@@ -1,0 +1,73 @@
+{
+  "project_info": {
+    "project_number": "49561629993",
+    "firebase_url": "https://sonder-6287a.firebaseio.com",
+    "project_id": "sonder-6287a",
+    "storage_bucket": "sonder-6287a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:49561629993:android:2717596a0a5d269e",
+        "android_client_info": {
+          "package_name": "ai.comcom.wallet"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "49561629993-m04jfaqvfkdpds3jba4qcu2ad11u0m55.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJojC5lI22Pkgrmf_l3qcJ5Qg6TJvxGAU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:49561629993:android:5babc48fd7306520",
+        "android_client_info": {
+          "package_name": "com.comcomai.wallet"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "49561629993-m04jfaqvfkdpds3jba4qcu2ad11u0m55.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJojC5lI22Pkgrmf_l3qcJ5Qg6TJvxGAU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
