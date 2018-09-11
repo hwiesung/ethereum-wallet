@@ -61,3 +61,6 @@ buck-out/
 /ios/Pods/
 # google-services.json
 # GoogleService-Info.plist
+
+Podfile.lock
+package-lock.json
