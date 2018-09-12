@@ -6,10 +6,12 @@ import { createStackNavigator, createBottomTabNavigator, createSwitchNavigator }
 import WalletScreen from './src/view/wallet_screen';
 import TradeScreen from './src/view/trade_screen';
 import MyScreen from './src/view/my_screen';
+import CreateWalletScreen from './src/view/create_wallet_screen';
+import CreatePrivateKeyScreen from './src/view/create_private_key_screen';
 
 const Tabs = createBottomTabNavigator(
   {
-    Home:{
+    Wallet:{
       screen:WalletScreen
     },
     Trade:{
@@ -17,6 +19,20 @@ const Tabs = createBottomTabNavigator(
     },
     My:{
       screen:MyScreen
+    }
+  }
+);
+
+const LoginStack = createStackNavigator(
+  {
+    Initial: {
+      screen: CreateWalletScreen,
+      navigationOptions: {
+        header: null
+      }
+    },
+    Secret: {
+      screen: CreatePrivateKeyScreen
     }
   }
 );
@@ -35,9 +51,13 @@ const RootStack = createSwitchNavigator(
   {
     Home: {
       screen: HomeStack
-
-
+    },
+    Login:{
+      screen: LoginStack
     }
+  },
+  {
+    initialRouteName: 'Login',
   }
 );
 
@@ -45,16 +65,11 @@ export default class App extends React.Component {
   constructor() {
     super();
     this.state = {
-      // firebase things?
+
     };
   }
 
   componentDidMount() {
-    // firebase things?
-  }
-
-  login() {
-    console.log("hello")
 
   }
 
