@@ -39,7 +39,7 @@ const LoginStack = createStackNavigator(
 
 const HomeStack = createStackNavigator(
   {
-    Trade: {
+    Main: {
       screen: Tabs,
       navigationOptions: {
         header: null
