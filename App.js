@@ -1,6 +1,4 @@
 import React from 'react';
-import { StyleSheet, Platform, Image, Text, View, ScrollView, Button } from 'react-native';
-import firebase from 'react-native-firebase';
 import { createStackNavigator, createBottomTabNavigator, createSwitchNavigator } from 'react-navigation';
 
 import WalletScreen from './src/view/wallet_screen';
@@ -8,6 +6,8 @@ import TradeScreen from './src/view/trade_screen';
 import MyScreen from './src/view/my_screen';
 import CreateWalletScreen from './src/view/create_wallet_screen';
 import CreatePrivateKeyScreen from './src/view/create_private_key_screen';
+import { Provider } from 'mobx-react/native';
+import appStore from './src/store/AppStore';
 
 const Tabs = createBottomTabNavigator(
   {
@@ -75,7 +75,7 @@ export default class App extends React.Component {
 
   render() {
     return (
-      <RootStack/>
+      <Provider appStore={appStore}><RootStack /></Provider>
     );
   }
 }
