@@ -14,37 +14,32 @@ export default class CreateWalletScreen extends Component {
     super();
     this.state = {
       isNewDevice : true,
-      isProcessing : false
+      isProcessing : true
     };
   }
   componentDidMount() {
     firebaseApp.auth().onAuthStateChanged((user) => {
-      if (user) {
+      if (user ) {
         console.log('userStateChanged:'+user.uid);
         const currentUser = firebaseApp.auth().currentUser;
         console.log(currentUser);
         this.props.appStore.init(currentUser.uid);
 
-        this.setState({isNewDevice:false});
+        this.setState({isNewDevice:false, isProcessing:true});
 
-        if(_.isEmpty(currentUser.displayName)){
-          this.props.navigation.navigate('Secret');
-        }
-        else{
-          this.props.navigation.navigate('Home');
-        }
+
       }
       else{
         console.log('not user');
 
-        this.setState({isNewDevice:true})
+        this.setState({isNewDevice:true, isProcessing:false})
       }
 
     });
   }
 
   createWallet(){
-    this.setState({isProcessing:true})
+    this.setState({isProcessing:true});
     firebaseApp.auth().signInAnonymouslyAndRetrieveData().catch((err)=>{
       if(err){
         this.setState({isProcessing:false});
@@ -53,11 +48,25 @@ export default class CreateWalletScreen extends Component {
     })
   }
 
+  moveToFindWallet(){
+    this.props.navigation.navigate('FindWallet');
+  }
+
 
   render() {
+    if(this.props.appStore.user){
+      if(this.props.appStore.user.init){
+        this.props.navigation.navigate('Home');
+      }
+      else
+      {
+        this.props.navigation.navigate('Secret');
+      }
+    }
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         {(this.state.isNewDevice && !this.state.isProcessing)?(<Button title="Create Wallet!" onPress={()=>this.createWallet()}/>):null}
+        {(this.state.isNewDevice && !this.state.isProcessing)?(<Button title="Find Wallet!" onPress={()=>this.moveToFindWallet()}/>):null}
         {(this.state.isProcessing)?(<ActivityIndicator/>):null}
         <Toast ref="toast"/>
       </View>

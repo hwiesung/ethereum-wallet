@@ -6,6 +6,7 @@ import TradeScreen from './src/view/trade_screen';
 import MyScreen from './src/view/my_screen';
 import CreateWalletScreen from './src/view/create_wallet_screen';
 import CreatePrivateKeyScreen from './src/view/create_private_key_screen';
+import FindWallet from './src/view/find_wallet';
 import { Provider } from 'mobx-react/native';
 import appStore from './src/store/AppStore';
 
@@ -33,7 +34,11 @@ const LoginStack = createStackNavigator(
     },
     Secret: {
       screen: CreatePrivateKeyScreen
+    },
+    FindWallet: {
+      screen: FindWallet
     }
+
   }
 );
 
