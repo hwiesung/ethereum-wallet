@@ -14,3 +14,6 @@ export const CoinType =  {
     fee:1
   }
 };
+
+
+export const WalletApiServer = 'https://comcom-wallet-api.herokuapp.com';

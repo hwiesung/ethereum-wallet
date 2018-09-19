@@ -69,13 +69,30 @@ class AppStore {
   onLoadWalletComplete(snapshot){
     if(snapshot.val()){
       this.wallet = snapshot.val();
+      this.walletInit = true;
     }
     else{
       console.log('wallet is not created');
     }
-    this.walletInit = true;
 
   }
+
+  @action
+  saveWallet(address, encrypted, mnemonic) {
+    let newWallet = {address:address, encrypted:encrypted, mnemonic:mnemonic};
+    firebaseApp.database().ref('/wallets/'+this.uid).set(newWallet, (err)=>{
+      if(err){
+        console.log('create wallet err');
+        console.log(err);
+      }
+      else{
+        console.log('wallet created');
+      }
+    });
+  }
+
+
+
 
 
 }

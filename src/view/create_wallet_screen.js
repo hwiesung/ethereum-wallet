@@ -17,7 +17,7 @@ export default class CreateWalletScreen extends Component {
       isProcessing : true
     };
   }
-  componentDidMount() {
+  componentWillMount() {
     firebaseApp.auth().onAuthStateChanged((user) => {
       if (user ) {
         console.log('userStateChanged:'+user.uid);
@@ -36,6 +36,10 @@ export default class CreateWalletScreen extends Component {
       }
 
     });
+  }
+
+  componentWillUnmount(){
+    console.log('singinPage will unmount');
   }
 
   createWallet(){

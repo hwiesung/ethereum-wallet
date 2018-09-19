@@ -23,6 +23,7 @@
     "preset": "react-native"
   },
   "dependencies": {
+    "axios": "^0.18.0",
     "fbjs": "^0.8.17",
     "lodash": "^4.17.11",
     "mobx": "^4.4.0",
