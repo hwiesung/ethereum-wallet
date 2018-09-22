@@ -32,6 +32,7 @@
     "react-native": "^0.55.3",
     "react-native-easy-toast": "^1.1.0",
     "react-native-firebase": "^4.3.6",
+    "react-native-fix-xcode-10": "rhdeck/react-native-fix-xcode-10",
     "react-navigation": "^2.13.0"
   }
 }
