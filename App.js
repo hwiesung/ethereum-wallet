@@ -6,7 +6,10 @@ import TradeScreen from './src/view/trade_screen';
 import MyScreen from './src/view/my_screen';
 import CreateWalletScreen from './src/view/create_wallet_screen';
 import CreatePrivateKeyScreen from './src/view/create_private_key_screen';
-import FindWallet from './src/view/find_wallet';
+import FindWalletFromPrivateKey from './src/view/find_wallet_from_pk';
+import FindWalletFromWords from './src/view/find_wallet_from_words';
+import AddExistWallet from './src/view/add_exist_wallet';
+
 import { Provider } from 'mobx-react/native';
 import appStore from './src/store/AppStore';
 
@@ -24,6 +27,20 @@ const Tabs = createBottomTabNavigator(
   }
 );
 
+
+const AddWalletStack = createSwitchNavigator({
+  AddWallet:{
+    screen:AddExistWallet
+  },
+  FindWalletPrivateKey:{
+    screen:FindWalletFromPrivateKey
+  },
+  FindWalletWords:{
+    screen:FindWalletFromWords
+  }
+});
+
+
 const LoginStack = createStackNavigator(
   {
     Initial: {
@@ -34,13 +51,11 @@ const LoginStack = createStackNavigator(
     },
     Secret: {
       screen: CreatePrivateKeyScreen
-    },
-    FindWallet: {
-      screen: FindWallet
     }
 
   }
 );
+
 
 const HomeStack = createStackNavigator(
   {
@@ -59,6 +74,9 @@ const RootStack = createSwitchNavigator(
     },
     Login:{
       screen: LoginStack
+    },
+    FindWallet: {
+      screen: AddWalletStack
     }
   },
   {

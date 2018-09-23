@@ -13,8 +13,8 @@ export default class CreateWalletScreen extends Component {
   constructor() {
     super();
     this.state = {
-      isNewDevice : true,
-      isProcessing : true
+      isProcessing : true,
+      requestSingIn : false
     };
   }
   componentWillMount() {
@@ -25,14 +25,14 @@ export default class CreateWalletScreen extends Component {
         console.log(currentUser);
         this.props.appStore.init(currentUser.uid);
 
-        this.setState({isNewDevice:false, isProcessing:true});
+        this.setState({isProcessing:false});
 
 
       }
       else{
         console.log('not user');
 
-        this.setState({isNewDevice:true, isProcessing:false})
+        this.setState({isProcessing:false})
       }
 
     });
@@ -43,7 +43,7 @@ export default class CreateWalletScreen extends Component {
   }
 
   createWallet(){
-    this.setState({isProcessing:true});
+    this.setState({isProcessing:true, requestSingIn:true});
     firebaseApp.auth().signInAnonymouslyAndRetrieveData().catch((err)=>{
       if(err){
         this.setState({isProcessing:false});
@@ -58,19 +58,20 @@ export default class CreateWalletScreen extends Component {
 
 
   render() {
+    console.log(this.state);
     if(this.props.appStore.user){
       if(this.props.appStore.user.init){
         this.props.navigation.navigate('Home');
       }
-      else
+      else if(this.state.requestSingIn)
       {
         this.props.navigation.navigate('Secret');
       }
     }
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        {(this.state.isNewDevice && !this.state.isProcessing)?(<Button title="Create Wallet!" onPress={()=>this.createWallet()}/>):null}
-        {(this.state.isNewDevice && !this.state.isProcessing)?(<Button title="Find Wallet!" onPress={()=>this.moveToFindWallet()}/>):null}
+        {(!this.state.isProcessing)?(<Button title="Create Wallet!" onPress={()=>this.createWallet()}/>):null}
+        {(!this.state.isProcessing)?(<Button title="Find Wallet!" onPress={()=>this.moveToFindWallet()}/>):null}
         {(this.state.isProcessing)?(<ActivityIndicator/>):null}
         <Toast ref="toast"/>
       </View>
