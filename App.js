@@ -9,6 +9,7 @@ import CreatePrivateKeyScreen from './src/view/create_private_key_screen';
 import FindWalletFromPrivateKey from './src/view/find_wallet_from_pk';
 import FindWalletFromWords from './src/view/find_wallet_from_words';
 import AddExistWallet from './src/view/add_exist_wallet';
+import GettingStart from './src/view/getting_start';
 
 import { Provider } from 'mobx-react/native';
 import appStore from './src/store/AppStore';
@@ -44,10 +45,13 @@ const AddWalletStack = createSwitchNavigator({
 const LoginStack = createStackNavigator(
   {
     Initial: {
-      screen: CreateWalletScreen,
+      screen: GettingStart,
       navigationOptions: {
         header: null
       }
+    },
+    CreateWallet:{
+      screen:CreateWalletScreen,
     },
     Secret: {
       screen: CreatePrivateKeyScreen
