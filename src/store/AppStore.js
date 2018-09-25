@@ -78,8 +78,8 @@ class AppStore {
   }
 
   @action
-  saveWallet(address, encrypted, mnemonic) {
-    let newWallet = {address:address, encrypted:encrypted, mnemonic:mnemonic};
+  saveWallet(address, encrypted, mnemonic, privateKey) {
+    let newWallet = {address:address, encrypted:encrypted, mnemonic:mnemonic, privateKey:privateKey};
     firebaseApp.database().ref('/wallets/'+this.uid).set(newWallet, (err)=>{
       if(err){
         console.log('create wallet err');

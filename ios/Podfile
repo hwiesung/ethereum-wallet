@@ -26,4 +26,6 @@ target 'wallet' do
   pod 'Fabric', '~> 1.7.5'
   pod 'Crashlytics', '~> 3.10.4'
 
+  pod 'RNDefaultPreference', :path => '../node_modules/react-native-default-preference'
+
 end

@@ -4,6 +4,9 @@ import { View,  Button, Text, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 import { observer, inject } from 'mobx-react/native'
 import Toast, {DURATION} from 'react-native-easy-toast'
+
+import DefaultPreference from 'react-native-default-preference';
+
 const instance = axios.create({
   baseURL: 'https://us-central1-sonder-6287a.cloudfunctions.net/',
   timeout: 1000,
@@ -24,12 +27,17 @@ export default class CreatePrivateKeyScreen extends Component {
     };
   }
 
-  componentWillMount() {
+  componentDidMount() {
 
     instance.post('create_wallet', {backupYn:true}).then( (result)=>{
       console.log(result.data);
       console.log(result.data.address);
-      this.setState({address:result.data.address, privateKey:result.data.privateKey, encrypted:result.data.encrypted, mnemonic:result.data.mnemonic})
+      DefaultPreference.set('privateKey', result.data.privateKey).then(()=>{
+        console.log('pk saved');
+        this.setState({address:result.data.address, privateKey:result.data.privateKey, encrypted:result.data.encrypted, mnemonic:result.data.mnemonic})
+      });
+
+
     }).catch((err)=>{
       console.log(err);
     });
@@ -42,7 +50,7 @@ export default class CreatePrivateKeyScreen extends Component {
       return;
     }
     this.setState({isProcessing:true});
-    this.props.appStore.saveWallet(this.state.address, this.state.encrypted, this.state.mnemonic);
+    this.props.appStore.saveWallet(this.state.address, this.state.encrypted, this.state.mnemonic, this.state.privateKey);
   }
 
   render() {
