@@ -28,4 +28,6 @@ target 'wallet' do
 
   pod 'RNDefaultPreference', :path => '../node_modules/react-native-default-preference'
 
+  pod 'BVLinearGradient', :path => '../node_modules/react-native-linear-gradient'
+
 end

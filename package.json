@@ -34,6 +34,7 @@
     "react-native-easy-toast": "^1.1.0",
     "react-native-firebase": "^4.3.6",
     "react-native-fix-xcode-10": "rhdeck/react-native-fix-xcode-10",
+    "react-native-linear-gradient": "^2.4.2",
     "react-native-textarea": "^1.0.2",
     "react-navigation": "^2.13.0",
     "rgb-hex": "^2.1.0"
