@@ -64,7 +64,7 @@ export default class GettingStart extends Component {
           <Text style={{marginTop:4, marginBottom:24, fontSize:20}}>Welcome to ComEx !!</Text>
           <View style={{backgroundColor:'red', height:202, width:324, borderRadius:12}}/>
         </View>
-        <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#5da7dc', '#306eb6']} style={{justifyContent: 'center',alignItems: 'center', borderRadius:12, marginBottom:38, backgroundColor:'rgb(48,110,182)',  width:300, height:58}}>
+        <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#5da7dc', '#306eb6']} style={{justifyContent: 'center',alignItems: 'center', borderRadius:12, marginBottom:38, backgroundColor:'rgb(48,110,182)',  width:330, height:58}}>
           <Text style={{color:'white', fontSize:20, fontWeight:'bold'}} onPress={()=>this.moveCreateWallet()}>Getting Start</Text>
         </LinearGradient>
 
