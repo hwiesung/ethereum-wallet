@@ -1,10 +1,10 @@
 import React, { Component } from 'react'
-import { View,  Button, ActivityIndicator, Text} from 'react-native';
+import { View,  Button, ActivityIndicator, Text, Image, TouchableOpacity} from 'react-native';
 import { observer, inject } from 'mobx-react/native'
 import { firebaseApp } from '../firebase'
 import Toast, {DURATION} from 'react-native-easy-toast'
 const rgbHex = require('rgb-hex');
-
+import LinearGradient from 'react-native-linear-gradient';
 import _ from 'lodash'
 
 @inject("appStore") @observer
@@ -71,11 +71,14 @@ export default class CreateWalletScreen extends Component {
     console.log(rgbHex(155,155,155));
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor:'white' }}>
-        <Text style={{fontSize:30, color:'black', fontWeight:'bold'}}>ComEx Wallet</Text>
-        <Text style={{marginTop:4, marginBottom:24, fontSize:20, color:'0x'+rgbHex(155,155,155)}}>Welcome to ComEx !!</Text>
-        <View style={{backgroundColor:'red', height:202, width:324}}/>
-        {(!this.state.isProcessing)?(<Button title="Create Wallet!" onPress={()=>this.createWallet()}/>):null}
-        {(!this.state.isProcessing)?(<Button title="Find Wallet!" onPress={()=>this.moveToFindWallet()}/>):null}
+        {(!this.state.isProcessing)?(<LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#5da7dc', '#306eb6']} style={{justifyContent: 'center',alignItems: 'center', backgroundColor:'red', height:202, width:324, borderRadius:12}} >
+          <TouchableOpacity style={{justifyContent: 'center',alignItems: 'center'}} onPress={()=>this.createWallet()}>
+            <Image source={require('../../assets/btnCommonPlus44Pt.png')}/>
+            <Text style={{marginTop:11, color:'white', fontSize:20, fontWeight:'bold'}}>Create new wallet</Text>
+          </TouchableOpacity>
+        </LinearGradient>):null}
+
+        <Text style={{marginTop:67, fontSize:16, color:'rgb(47,109,182)', textDecorationLine: 'underline'}} onPress={()=>this.moveToFindWallet()}>Already have Wallet</Text>
         {(this.state.isProcessing)?(<ActivityIndicator/>):null}
         <Toast ref="toast"/>
       </View>

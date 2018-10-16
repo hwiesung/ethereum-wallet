@@ -58,8 +58,8 @@ export default class CreatePrivateKeyScreen extends Component {
       this.props.navigation.navigate('Home');
     }
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <Text> Write down your secret words</Text>
+      <View style={{ flex: 1, alignItems: 'center', backgroundColor:'white'}}>
+        <Text style={{marginTop:54}}> Backup Phrase</Text>
         <Text> {this.state.mnemonic} </Text>
         {(this.state.isProcessing)?(<ActivityIndicator/>):(<Button title="Done" onPress={()=>this.createWallet()}/>)}
         <Toast ref="toast"/>
