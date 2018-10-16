@@ -31,12 +31,7 @@ export default class CreatePrivateKeyScreen extends Component {
 
     instance.post('create_wallet', {backupYn:true}).then( (result)=>{
       console.log(result.data);
-      console.log(result.data.address);
-      DefaultPreference.set('privateKey', result.data.privateKey).then(()=>{
-        console.log('pk saved');
-        this.setState({address:result.data.address, privateKey:result.data.privateKey, encrypted:result.data.encrypted, mnemonic:result.data.mnemonic, isProcessing:false})
-      });
-
+      this.setState({address:result.data.address, privateKey:result.data.privateKey, encrypted:result.data.encrypted, mnemonic:result.data.mnemonic, isProcessing:false});
 
     }).catch((err)=>{
       console.log(err);
@@ -44,7 +39,7 @@ export default class CreatePrivateKeyScreen extends Component {
   }
 
   moveToVerify(){
-
+    this.props.navigation.navigate('VerifySecret', {address:this.state.address, privateKey:this.state.privateKey, encrypted:this.state.encrypted, mnemonic:this.state.mnemonic});
   }
 
   copyWords(){

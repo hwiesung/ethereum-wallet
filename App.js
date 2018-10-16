@@ -10,7 +10,7 @@ import FindWalletFromPrivateKey from './src/view/find_wallet_from_pk';
 import FindWalletFromWords from './src/view/find_wallet_from_words';
 import AddExistWallet from './src/view/add_exist_wallet';
 import GettingStart from './src/view/getting_start';
-
+import VerifySecretWords from './src/view/verify_secret_words';
 import { Provider } from 'mobx-react/native';
 import appStore from './src/store/AppStore';
 
@@ -55,6 +55,9 @@ const LoginStack = createStackNavigator(
     },
     Secret: {
       screen: CreatePrivateKeyScreen
+    },
+    VerifySecret:{
+      screen: VerifySecretWords
     }
 
   }
