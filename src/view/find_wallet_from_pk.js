@@ -1,10 +1,19 @@
 import React, { Component } from 'react'
-import { View,  Button, Text, TextInput,TouchableOpacity, Image } from 'react-native';
+import { View,  Button, Text, TextInput,TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import {firebaseApp} from "../firebase";
 import LinearGradient from 'react-native-linear-gradient';
-
+import axios from "axios/index";
+import DefaultPreference from "react-native-default-preference";
+import Toast, {DURATION} from 'react-native-easy-toast'
 
 const PRIVATE_KEY_LENGTH=66;
+
+const instance = axios.create({
+  baseURL: 'https://comcom-wallet-api.herokuapp.com/',
+  timeout: 5000,
+  headers: {'Content-Type':'application/json'}
+});
+
 
 export default class FindWalletFromPrivateKey extends Component {
 
@@ -12,7 +21,8 @@ export default class FindWalletFromPrivateKey extends Component {
     super(props);
     this.state = {
       value: '',
-      complete: true
+      complete: true,
+      isProcessing:false
     };
   }
 
@@ -43,7 +53,14 @@ export default class FindWalletFromPrivateKey extends Component {
   }
 
   findWallet(){
+    instance.get('accountFromKey?key='+this.state.value).then( (result)=>{
+      if(result.status == 200){
+        this.refs.toast.show(result.data.address, DURATION.LENGTH_SHORT);
+      }
 
+    }).catch((err)=>{
+      console.log(err);
+    });
   }
 
   render() {
@@ -68,12 +85,14 @@ export default class FindWalletFromPrivateKey extends Component {
         </View>
 
 
-        <View style={{marginBottom:47, alignItems: 'center'}}>
+        {(!this.state.isProcessing)?(<TouchableOpacity style={{marginBottom:47, alignItems: 'center'}} onPress={()=>this.findWallet()}>
           <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={btnColor} style={{justifyContent: 'center',alignItems: 'center', borderRadius:12, width:330, height:58}}>
-            <Text style={{color:'white', fontSize:20, fontWeight:'bold'}} onPress={()=>this.findWallet()}>Connect</Text>
+            <Text style={{color:'white', fontSize:20, fontWeight:'bold'}}>Connect</Text>
           </LinearGradient>
-        </View>
+        </TouchableOpacity>):null}
 
+        {(this.state.isProcessing)?(<ActivityIndicator/>):null}
+        <Toast ref="toast"/>
       </View>
     );
   }

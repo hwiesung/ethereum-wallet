@@ -49,6 +49,7 @@ export default class SplashScreen extends Component {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor:'white' }}>
         <Text>Splash</Text>
+        <Toast ref="toast"/>
       </View>
 
     );

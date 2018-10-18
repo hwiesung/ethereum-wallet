@@ -61,11 +61,11 @@ export default class FindWalletFromWords extends Component {
         </View>
 
 
-        <View style={{marginBottom:47, alignItems: 'center'}}>
+        <TouchableOpacity style={{marginBottom:47, alignItems: 'center'}} onPress={()=>this.findWallet()}>
           <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={btnColor} style={{justifyContent: 'center',alignItems: 'center', borderRadius:12, width:330, height:58}}>
-            <Text style={{color:'white', fontSize:20, fontWeight:'bold'}} onPress={()=>this.findWallet()}>Connect</Text>
+            <Text style={{color:'white', fontSize:20, fontWeight:'bold'}} >Connect</Text>
           </LinearGradient>
-        </View>
+        </TouchableOpacity>
 
       </View>
     );

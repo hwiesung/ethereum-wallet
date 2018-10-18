@@ -37,12 +37,16 @@ export default class AddExistWallet extends Component {
 
         </View>
         <View style={{marginBottom:47, alignItems: 'center'}}>
+          <TouchableOpacity onPress={()=>this.importFromPrivateKey()} >
           <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#5da7dc', '#306eb6']} style={{justifyContent: 'center',alignItems: 'center', borderRadius:12, marginBottom:17,  width:330, height:58}}>
-            <Text style={{color:'white', fontSize:20, fontWeight:'bold'}} onPress={()=>this.importFromPrivateKey()}>Private Key</Text>
+            <Text style={{color:'white', fontSize:20, fontWeight:'bold'}} >Private Key</Text>
           </LinearGradient>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={()=>this.importFromSecretWords()} >
           <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#5da7dc', '#306eb6']} style={{justifyContent: 'center',alignItems: 'center', borderRadius:12, width:330, height:58}}>
-            <Text style={{color:'white', fontSize:20, fontWeight:'bold'}} onPress={()=>this.importFromSecretWords()}>12 Words</Text>
+            <Text style={{color:'white', fontSize:20, fontWeight:'bold'}}>12 Words</Text>
           </LinearGradient>
+          </TouchableOpacity>
         </View>
 
 

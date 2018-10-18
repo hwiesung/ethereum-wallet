@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View,  Button, Text, ActivityIndicator, Clipboard } from 'react-native';
+import { View,  Button, Text, ActivityIndicator, Clipboard,TouchableOpacity} from 'react-native';
 
 import axios from 'axios';
 import { observer, inject } from 'mobx-react/native'
@@ -72,9 +72,9 @@ export default class CreatePrivateKeyScreen extends Component {
           {(!this.state.isProcessing)?(<Text style={{marginTop:26, fontSize:16, color:'rgb(47,109,182)' }} onPress={()=>this.copyWords()}>Copy Text</Text>):null}
         </View>
 
-        {(!this.state.isProcessing)?(<LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#5da7dc', '#306eb6']} style={{justifyContent: 'center',alignItems: 'center', borderRadius:12, marginBottom:38, backgroundColor:'rgb(48,110,182)',  width:330, height:58}}>
-            <Text style={{color:'white', fontSize:20, fontWeight:'bold'}} onPress={()=>this.moveToVerify()}>Next</Text>
-          </LinearGradient>):null}
+        {(!this.state.isProcessing)?(<TouchableOpacity onPress={()=>this.moveToVerify()}><LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#5da7dc', '#306eb6']} style={{justifyContent: 'center',alignItems: 'center', borderRadius:12, marginBottom:38, backgroundColor:'rgb(48,110,182)',  width:330, height:58}}>
+            <Text style={{color:'white', fontSize:20, fontWeight:'bold'}} >Next</Text>
+          </LinearGradient></TouchableOpacity>):null}
 
         <Toast ref="toast"/>
       </View>

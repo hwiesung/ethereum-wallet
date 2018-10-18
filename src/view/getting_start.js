@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View,  Button, ActivityIndicator, Text} from 'react-native';
+import { View,  Button, ActivityIndicator, Text, TouchableOpacity} from 'react-native';
 import { observer, inject } from 'mobx-react/native'
 import { firebaseApp } from '../firebase'
 import Toast, {DURATION} from 'react-native-easy-toast'
@@ -60,9 +60,11 @@ export default class GettingStart extends Component {
           <Text style={{marginTop:4, marginBottom:24, fontSize:20}}>Welcome to ComEx !!</Text>
           <View style={{backgroundColor:'red', height:202, width:324, borderRadius:12}}/>
         </View>
-        <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#5da7dc', '#306eb6']} style={{justifyContent: 'center',alignItems: 'center', borderRadius:12, marginBottom:38, backgroundColor:'rgb(48,110,182)',  width:330, height:58}}>
-          <Text style={{color:'white', fontSize:20, fontWeight:'bold'}} onPress={()=>this.moveCreateWallet()}>Getting Start</Text>
+        <TouchableOpacity onPress={()=>this.moveCreateWallet()}>
+          <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#5da7dc', '#306eb6']} style={{justifyContent: 'center',alignItems: 'center', borderRadius:12, marginBottom:38, backgroundColor:'rgb(48,110,182)',  width:330, height:58}}>
+          <Text style={{color:'white', fontSize:20, fontWeight:'bold'}} >Getting Start</Text>
         </LinearGradient>
+      </TouchableOpacity>
       </View>
 
     );

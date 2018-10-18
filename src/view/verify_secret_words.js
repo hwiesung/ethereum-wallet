@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View,  Button, Text, ActivityIndicator } from 'react-native';
+import { View,  Button, Text, ActivityIndicator,TouchableOpacity} from 'react-native';
 
 import axios from 'axios';
 import { observer, inject } from 'mobx-react/native';
@@ -176,11 +176,11 @@ export default class VerifySecretWords extends Component {
             );
           })}
         </View>
-        {(!this.state.isProcessing)?(<LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={btnColor} style={{justifyContent: 'center',alignItems: 'center', borderRadius:12, marginBottom:38, backgroundColor:'rgb(48,110,182)',  width:330, height:58}}>
-          <Text style={{color:'white', fontSize:20, fontWeight:'bold'}} onPress={()=>this.createWallet()}>Next</Text>
-        </LinearGradient>):null}
+        {(!this.state.isProcessing)?(<TouchableOpacity onPress={()=>this.createWallet()}><LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={btnColor} style={{justifyContent: 'center',alignItems: 'center', borderRadius:12, marginBottom:38, backgroundColor:'rgb(48,110,182)',  width:330, height:58}}>
+          <Text style={{color:'white', fontSize:20, fontWeight:'bold'}}>Next</Text>
+        </LinearGradient></TouchableOpacity>):null}
 
-
+        {(this.state.isProcessing)?(<ActivityIndicator/>):null}
         <Toast ref="toast"/>
       </View>
     );

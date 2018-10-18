@@ -83,9 +83,9 @@ export default class BackupWallet extends Component {
           <Text style={{width:280, marginLeft:14, fontSize:14, color:'black' }}>I understand that if I lose my secret phrase, I will not be able to access my account.</Text>
         </TouchableOpacity>):null}
 
-        {(!this.state.isProcessing)?(<LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={btnColor} style={{justifyContent: 'center',alignItems: 'center', borderRadius:12, marginBottom:32,  width:330, height:58}}>
-          <Text style={{color:'white', fontSize:20, fontWeight:'bold'}} onPress={()=>this.moveToBackup()}>Continue</Text>
-        </LinearGradient>):null}
+        {(!this.state.isProcessing)?(<TouchableOpacity onPress={()=>this.moveToBackup()}><LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={btnColor} style={{justifyContent: 'center',alignItems: 'center', borderRadius:12, marginBottom:32,  width:330, height:58}}>
+          <Text style={{color:'white', fontSize:20, fontWeight:'bold'}} >Continue</Text>
+        </LinearGradient></TouchableOpacity>):null}
 
         <Text style={{marginBottom:52, fontSize:16, color:'rgb(47,109,182)'}} onPress={()=>this.createWallet()}>
           Skip
