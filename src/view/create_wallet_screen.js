@@ -13,44 +13,15 @@ export default class CreateWalletScreen extends Component {
   constructor() {
     super();
     this.state = {
-      isProcessing : true,
+      isProcessing : false,
       requestSingIn : false
     };
   }
-  componentWillMount() {
-    firebaseApp.auth().onAuthStateChanged((user) => {
-      if (user ) {
-        console.log('userStateChanged:'+user.uid);
-        const currentUser = firebaseApp.auth().currentUser;
-        console.log(currentUser);
-        this.props.appStore.init(currentUser.uid);
-
-        this.setState({isProcessing:false});
-
-
-      }
-      else{
-        console.log('not user');
-
-        this.setState({isProcessing:false})
-      }
-
-    });
-  }
-
-  componentWillUnmount(){
-    console.log('singinPage will unmount');
-  }
 
   createWallet(){
-    this.setState({isProcessing:true, requestSingIn:true});
-    firebaseApp.auth().signInAnonymouslyAndRetrieveData().catch((err)=>{
-      if(err){
-        this.setState({isProcessing:false});
-        this.refs.toast.show('Failed to Login', DURATION.LENGTH_SHORT);
-      }
-    })
+    this.props.navigation.navigate('Secret');
   }
+
 
   moveToFindWallet(){
     this.props.navigation.navigate('FindWallet');
@@ -58,17 +29,6 @@ export default class CreateWalletScreen extends Component {
 
 
   render() {
-    console.log(this.state);
-    if(this.props.appStore.user){
-      if(this.props.appStore.user.init){
-        this.props.navigation.navigate('Home');
-      }
-      else if(this.state.requestSingIn)
-      {
-        this.props.navigation.navigate('Secret');
-      }
-    }
-    console.log(rgbHex(155,155,155));
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor:'white' }}>
         {(!this.state.isProcessing)?(<LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#5da7dc', '#306eb6']} style={{justifyContent: 'center',alignItems: 'center', backgroundColor:'red', height:202, width:324, borderRadius:12}} >

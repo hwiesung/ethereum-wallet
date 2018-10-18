@@ -9,7 +9,7 @@ import DefaultPreference from 'react-native-default-preference';
 import LinearGradient from 'react-native-linear-gradient';
 const instance = axios.create({
   baseURL: 'https://us-central1-sonder-6287a.cloudfunctions.net/',
-  timeout: 1000,
+  timeout: 3000,
   headers: {'Content-Type':'application/json'}
 });
 

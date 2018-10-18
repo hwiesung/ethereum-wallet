@@ -12,7 +12,7 @@ export default class GettingStart extends Component {
     super();
     this.state = {
       isProcessing : true,
-      requestSingIn : false
+      signIn : false
     };
   }
   componentWillMount() {
@@ -23,14 +23,17 @@ export default class GettingStart extends Component {
         console.log(currentUser);
         this.props.appStore.init(currentUser.uid);
 
-        this.setState({isProcessing:false});
+        this.setState({isProcessing:false, signIn:true});
 
 
       }
       else{
         console.log('not user');
-
-        this.setState({isProcessing:false})
+        firebaseApp.auth().signInAnonymouslyAndRetrieveData().catch((err)=>{
+          if(err){
+            this.refs.toast.show('Failed to Login, Please turn on mobile network.', DURATION.LENGTH_SHORT);
+          }
+        });
       }
 
     });
@@ -41,7 +44,10 @@ export default class GettingStart extends Component {
   }
 
   moveCreateWallet(){
-    this.props.navigation.navigate('CreateWallet');
+    console.log(this.props.appStore);
+    if(this.state.signIn){
+      this.props.navigation.navigate('CreateWallet');
+    }
   }
 
 
@@ -51,10 +57,7 @@ export default class GettingStart extends Component {
       if(this.props.appStore.user.init){
         this.props.navigation.navigate('Home');
       }
-      else if(this.state.requestSingIn)
-      {
 
-      }
     }
 
     return (
@@ -67,12 +70,6 @@ export default class GettingStart extends Component {
         <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#5da7dc', '#306eb6']} style={{justifyContent: 'center',alignItems: 'center', borderRadius:12, marginBottom:38, backgroundColor:'rgb(48,110,182)',  width:330, height:58}}>
           <Text style={{color:'white', fontSize:20, fontWeight:'bold'}} onPress={()=>this.moveCreateWallet()}>Getting Start</Text>
         </LinearGradient>
-
-
-
-
-
-
       </View>
 
     );
