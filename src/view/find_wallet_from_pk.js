@@ -5,7 +5,8 @@ import LinearGradient from 'react-native-linear-gradient';
 import axios from "axios/index";
 import DefaultPreference from "react-native-default-preference";
 import Toast, {DURATION} from 'react-native-easy-toast'
-
+import { observer, inject } from 'mobx-react/native'
+import { action } from 'mobx'
 const PRIVATE_KEY_LENGTH=66;
 
 const instance = axios.create({
@@ -14,14 +15,14 @@ const instance = axios.create({
   headers: {'Content-Type':'application/json'}
 });
 
-
+@inject("appStore") @observer
 export default class FindWalletFromPrivateKey extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
       value: '',
-      complete: true,
+      complete: false,
       isProcessing:false
     };
   }
@@ -53,14 +54,29 @@ export default class FindWalletFromPrivateKey extends Component {
   }
 
   findWallet(){
+    this.setState({isProcessing:true});
+    let address = '';
+    let privateKey = '';
     instance.get('accountFromKey?key='+this.state.value).then( (result)=>{
-      if(result.status == 200){
-        this.refs.toast.show(result.data.address, DURATION.LENGTH_SHORT);
-      }
+      address = result.data.address;
+      privateKey = result.data.privateKey;
+      return DefaultPreference.set('privateKey', privateKey);
 
+
+    }).then(()=>{
+      console.log('pk saved');
+      this.props.appStore.saveWallet(address, '','', privateKey, this.walletCrated);
     }).catch((err)=>{
-      console.log(err);
+      this.refs.toast.show('Failed to add wallet, try again later.', DURATION.LENGTH_SHORT);
     });
+  }
+
+
+  @action.bound
+  walletCrated(){
+    console.log('wallet added!!!');
+    this.setState({isProcessing:true});
+    this.props.navigation.navigate('CompleteWallet', {msg:'Wallet added!'});
   }
 
   render() {
@@ -81,7 +97,7 @@ export default class FindWalletFromPrivateKey extends Component {
 
           </View>
 
-
+          {(this.state.isProcessing)?(<ActivityIndicator style={{marginTop:40}}/>):null}
         </View>
 
 
@@ -91,7 +107,7 @@ export default class FindWalletFromPrivateKey extends Component {
           </LinearGradient>
         </TouchableOpacity>):null}
 
-        {(this.state.isProcessing)?(<ActivityIndicator/>):null}
+
         <Toast ref="toast"/>
       </View>
     );
