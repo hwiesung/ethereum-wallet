@@ -11,6 +11,7 @@ import FindWalletFromWords from './src/view/find_wallet_from_words';
 import AddExistWallet from './src/view/add_exist_wallet';
 import SplashScreen from './src/view/splash_screen';
 import GettingStart from './src/view/getting_start';
+import BackupWallet from './src/view/backup_wallet';
 import CompleteWallet from './src/view/complete_wallet';
 import VerifySecretWords from './src/view/verify_secret_words';
 import { Provider } from 'mobx-react/native';
@@ -55,6 +56,9 @@ const LoginStack = createStackNavigator(
     CreateWallet:{
       screen:CreateWalletScreen,
     },
+    BackupWallet:{
+      screen:BackupWallet
+    },
     Secret: {
       screen: CreatePrivateKeyScreen
     },
@@ -62,7 +66,10 @@ const LoginStack = createStackNavigator(
       screen: VerifySecretWords
     },
     CreatedWallet:{
-      screen:CompleteWallet
+      screen:CompleteWallet,
+      navigationOptions: {
+        header: null
+      }
     }
 
   }

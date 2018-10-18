@@ -19,7 +19,7 @@ export default class CreateWalletScreen extends Component {
   }
 
   createWallet(){
-    this.props.navigation.navigate('Secret');
+    this.props.navigation.navigate('BackupWallet');
   }
 
 
