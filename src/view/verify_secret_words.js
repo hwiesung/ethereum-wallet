@@ -106,7 +106,7 @@ export default class VerifySecretWords extends Component {
   @action.bound
   walletCrated(){
     console.log('wallet created!!!');
-    this.props.navigation.navigate('CreatedWallet', {msg:'Wallet created!'});
+    this.props.navigation.navigate('CompleteWallet', {msg:'Wallet created!'});
   }
 
 

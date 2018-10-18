@@ -32,15 +32,24 @@ const Tabs = createBottomTabNavigator(
 );
 
 
-const AddWalletStack = createSwitchNavigator({
-  AddWallet:{
-    screen:AddExistWallet
+const AddWalletStack = createStackNavigator({
+  AddWallet: {
+    screen: AddExistWallet,
+    navigationOptions: {
+      header: null
+    }
   },
   FindWalletPrivateKey:{
-    screen:FindWalletFromPrivateKey
+    screen:FindWalletFromPrivateKey,
+    navigationOptions: {
+      header: null
+    }
   },
   FindWalletWords:{
-    screen:FindWalletFromWords
+    screen:FindWalletFromWords,
+    navigationOptions: {
+      header: null
+    }
   }
 });
 
@@ -59,19 +68,18 @@ const LoginStack = createStackNavigator(
     BackupWallet:{
       screen:BackupWallet
     },
+    FindWallet: {
+      screen: AddWalletStack,
+      navigationOptions: {
+        header: null
+      }
+    },
     Secret: {
       screen: CreatePrivateKeyScreen
     },
     VerifySecret:{
       screen: VerifySecretWords
-    },
-    CreatedWallet:{
-      screen:CompleteWallet,
-      navigationOptions: {
-        header: null
-      }
     }
-
   }
 );
 
@@ -97,8 +105,8 @@ const RootStack = createSwitchNavigator(
     Login:{
       screen: LoginStack
     },
-    FindWallet: {
-      screen: AddWalletStack
+    CompleteWallet:{
+      screen:CompleteWallet
     }
   },
   {

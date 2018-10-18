@@ -61,7 +61,7 @@ export default class BackupWallet extends Component {
   walletCrated(){
     console.log('wallet created!!!');
     this.setState({isProcessing:true});
-    this.props.navigation.navigate('CreatedWallet', {msg:'Wallet created!'});
+    this.props.navigation.navigate('CompleteWallet', {msg:'Wallet created!'});
   }
 
 
