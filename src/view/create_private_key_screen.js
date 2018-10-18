@@ -57,9 +57,6 @@ export default class CreatePrivateKeyScreen extends Component {
   };
 
   render() {
-    if(this.props.appStore.user.init){
-      this.props.navigation.navigate('Home');
-    }
     return (
       <View style={{ flex: 1, alignItems: 'center', backgroundColor:'white'}}>
 

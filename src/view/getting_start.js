@@ -52,13 +52,6 @@ export default class GettingStart extends Component {
 
 
   render() {
-    console.log(this.state);
-    if(this.props.appStore.user){
-      if(this.props.appStore.user.init){
-        this.props.navigation.navigate('Home');
-      }
-
-    }
 
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor:'white' }}>

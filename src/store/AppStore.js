@@ -46,7 +46,7 @@ class AppStore {
       me = { uid:this.uid, init:false};
       firebaseApp.database().ref('/users/' + this.uid).set(me, (err) => {
         if (err) {
-          console.log("7user add fail");
+          console.log("user add fail");
         }
         else {
           console.log('user added');
@@ -70,6 +70,7 @@ class AppStore {
     if(snapshot.val()){
       this.wallet = snapshot.val();
       this.walletInit = true;
+      console.log('wallet loaded');
     }
     else{
       console.log('wallet is not created');
@@ -78,7 +79,7 @@ class AppStore {
   }
 
   @action
-  saveWallet(address, encrypted, mnemonic, privateKey) {
+  saveWallet(address, encrypted, mnemonic, privateKey, callback) {
     let newWallet = {address:address, encrypted:encrypted, mnemonic:mnemonic, privateKey:privateKey};
     firebaseApp.database().ref('/wallets/'+this.uid).set(newWallet, (err)=>{
       if(err){
@@ -87,6 +88,7 @@ class AppStore {
       }
       else{
         console.log('wallet created');
+        callback();
       }
     });
   }

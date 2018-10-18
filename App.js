@@ -11,6 +11,7 @@ import FindWalletFromWords from './src/view/find_wallet_from_words';
 import AddExistWallet from './src/view/add_exist_wallet';
 import SplashScreen from './src/view/splash_screen';
 import GettingStart from './src/view/getting_start';
+import CompleteWallet from './src/view/complete_wallet';
 import VerifySecretWords from './src/view/verify_secret_words';
 import { Provider } from 'mobx-react/native';
 import appStore from './src/store/AppStore';
@@ -46,12 +47,6 @@ const AddWalletStack = createSwitchNavigator({
 const LoginStack = createStackNavigator(
   {
     Initial: {
-      screen: SplashScreen,
-      navigationOptions: {
-        header: null
-      }
-    },
-    GettingStart:{
       screen: GettingStart,
       navigationOptions: {
         header: null
@@ -65,6 +60,9 @@ const LoginStack = createStackNavigator(
     },
     VerifySecret:{
       screen: VerifySecretWords
+    },
+    CreatedWallet:{
+      screen:CompleteWallet
     }
 
   }
@@ -83,6 +81,9 @@ const HomeStack = createStackNavigator(
 );
 const RootStack = createSwitchNavigator(
   {
+    Splash:{
+      screen:SplashScreen
+    },
     Home: {
       screen: HomeStack
     },
@@ -94,7 +95,7 @@ const RootStack = createSwitchNavigator(
     }
   },
   {
-    initialRouteName: 'Login',
+    initialRouteName: 'Splash',
   }
 );
 

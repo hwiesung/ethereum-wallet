@@ -34,11 +34,6 @@ export default class SplashScreen extends Component {
     });
   }
 
-  componentWillUnmount(){
-    console.log('singinPage will unmount');
-  }
-
-
   render() {
     console.log(this.state);
     if(this.props.appStore.user){
@@ -46,7 +41,7 @@ export default class SplashScreen extends Component {
         this.props.navigation.navigate('Home');
       }
       else{
-        this.props.navigation.navigate('GettingStart');
+        this.props.navigation.navigate('Login');
       }
 
     }

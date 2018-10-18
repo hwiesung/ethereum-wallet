@@ -2,7 +2,8 @@ import React, { Component } from 'react'
 import { View,  Button, Text, ActivityIndicator } from 'react-native';
 
 import axios from 'axios';
-import { observer, inject } from 'mobx-react/native'
+import { observer, inject } from 'mobx-react/native';
+import { action } from 'mobx'
 import Toast, {DURATION} from 'react-native-easy-toast'
 
 import DefaultPreference from 'react-native-default-preference';
@@ -61,7 +62,7 @@ export default class VerifySecretWords extends Component {
     this.setState({isProcessing:true});
     DefaultPreference.set('privateKey', this.state.privateKey).then(()=>{
       console.log('pk saved');
-      this.props.appStore.saveWallet(this.state.address, this.state.encrypted, this.state.mnemonic, this.state.privateKey);
+      this.props.appStore.saveWallet(this.state.address, this.state.encrypted, this.state.mnemonic, this.state.privateKey, this.walletCrated);
     });
 
   }
@@ -69,7 +70,7 @@ export default class VerifySecretWords extends Component {
   selectWord(word){
     if(!this.state.selected[word]){
       let selected = {};
-      Object.assign(selected, this.state.selected)
+      Object.assign(selected, this.state.selected);
       selected[word] = true;
 
       let verified = this.verifyWords(Object.keys(selected));
@@ -102,11 +103,13 @@ export default class VerifySecretWords extends Component {
     return false;
   }
 
-  componentDidUpdate(prevProps){
-    if(this.props.appStore.user.init){
-      console.log('wallet created!!!!!');
-    }
+  @action.bound
+  walletCrated(){
+    console.log('wallet created!!!');
+    this.props.navigation.navigate('CreatedWallet', {msg:'Wallet created!'});
   }
+
+
 
   render() {
     console.log(this.state.mnemonic);
