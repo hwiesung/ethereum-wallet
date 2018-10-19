@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { View,  Button, Text, TextInput,TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import {firebaseApp} from "../firebase";
 import LinearGradient from 'react-native-linear-gradient';
-import axios from "axios/index";
+import axios from 'axios';
 import DefaultPreference from "react-native-default-preference";
 import Toast, {DURATION} from 'react-native-easy-toast'
 import { observer, inject } from 'mobx-react/native'
@@ -75,7 +75,7 @@ export default class FindWalletFromPrivateKey extends Component {
   @action.bound
   walletCrated(){
     console.log('wallet added!!!');
-    this.setState({isProcessing:true});
+    this.setState({isProcessing:false});
     this.props.navigation.navigate('CompleteWallet', {msg:'Wallet added!'});
   }
 
@@ -90,8 +90,8 @@ export default class FindWalletFromPrivateKey extends Component {
         </TouchableOpacity>
         <View style={{ flex: 1, alignItems: 'center'}}>
           <Text style={{fontSize:22, fontWeight:'bold', color:'black', marginTop:54}}>Add Wallet</Text>
-          <Text style={{fontSize:16, color:'rgb(155,155,155)', marginTop:20}}>Please select method to import your wallet</Text>
-          <View style={{height:126, width:324, backgroundColor:'rgb(243,243,243)', padding:12, marginTop:77}}>
+          <Text style={{fontSize:16, color:'rgb(155,155,155)', marginTop:20}}>Input your private key</Text>
+          <View style={{height:126, width:324, backgroundColor:'rgb(243,243,243)', borderWidth:1, borderColor:'rgb(220,220,220)', borderRadius:5, padding:12, marginTop:77}}>
             <TextInput style={{borderWidth:0, fontSize:16}} value={this.state.value} placeholder={'Input Private Key'} multiline={true} maxLength={PRIVATE_KEY_LENGTH} underlineColorAndroid={'transparent'}
                        onChangeText={(text)=>this.inputText(text)} />
 
