@@ -65,3 +65,7 @@ buck-out/
 Podfile.lock
 package-lock.json
 yarn.lock
+
+/android/app/src/main/assets/*
+/android/app/src/main/res/*
+/ios/wallet.xcworkspace/xcshareddata/*
