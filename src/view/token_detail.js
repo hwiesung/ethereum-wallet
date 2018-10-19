@@ -7,7 +7,7 @@ import { action } from 'mobx'
 import LinearGradient from 'react-native-linear-gradient';
 
 @inject("appStore") @observer
-export default class WalletScreen extends Component {
+export default class TokenDetail extends Component {
   constructor() {
     super();
     this.state = {
@@ -29,10 +29,11 @@ export default class WalletScreen extends Component {
     tokens.push({name:'AFAN', amount:'500', value:'3,000 USD'});
     this.setState({tokens:tokens});
   }
+
   moveDetail(index){
     console.log(index);
-    this.props.navigation.navigate('TokenDetail', {token:this.state.tokens[index].name});
   }
+
 
   render() {
     let address = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet.address : '';
@@ -49,7 +50,7 @@ export default class WalletScreen extends Component {
             <View style={{flex:1, backgroundColor:'rgb(240,240,240)', marginTop:16, borderBottomLeftRadius:15, borderBottomRightRadius:15}}>
               {this.state.tokens.map((token, index)=>{
                 return (
-                  <TouchableOpacity key={index} style={{flexDirection:'row'}} onPress={()=>this.moveDetail(index)}>
+                  <TouchableOpacity key={index} style={{flexDirection:'row'}} onPress={()=>this.moveDetail('a')}>
                     <View style={{flex:1}}>
                       <View style={{height:1, backgroundColor:'rgb(230,230,230)'}}/>
                       <View style={{height:64, alignItems: 'center', flexDirection:'row'}}>
@@ -66,7 +67,7 @@ export default class WalletScreen extends Component {
               })}
               <View style={{flex:1}}/>
               <View style={{flexDirection:'row', marginBottom:14, justifyContent:'center'}}>
-              <Text style={{fontSize:16, color:'rgb(155,155,155)', textDecorationLine: 'underline'}}>Edit Tokens</Text>
+                <Text style={{fontSize:16, color:'rgb(155,155,155)', textDecorationLine: 'underline'}}>Edit Tokens</Text>
               </View>
             </View>
           </View>

@@ -13,6 +13,7 @@ import SplashScreen from './src/view/splash_screen';
 import GettingStart from './src/view/getting_start';
 import BackupWallet from './src/view/backup_wallet';
 import CompleteWallet from './src/view/complete_wallet';
+import TokenDetail from './src/view/token_detail';
 import VerifySecretWords from './src/view/verify_secret_words';
 import { Provider } from 'mobx-react/native';
 import appStore from './src/store/AppStore';
@@ -91,6 +92,9 @@ const HomeStack = createStackNavigator(
       navigationOptions: {
         header: null
       }
+    },
+    TokenDetail:{
+      screen:TokenDetail
     }
   }
 );
