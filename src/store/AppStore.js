@@ -1,5 +1,6 @@
 import { observable, autorun, action } from 'mobx'
 import { firebaseApp } from '../firebase'
+const moment = require('moment');
 
 class AppStore {
   @observable uid = null;
@@ -69,6 +70,10 @@ class AppStore {
   onLoadWalletComplete(snapshot){
     if(snapshot.val()){
       this.wallet = snapshot.val();
+      let before5min = moment().subtract(5, 'minute').utc().valueOf();
+      if(this.wallet.update_time < before5min){
+        firebaseApp.database().ref('/sync/'+this.uid+'/balance').set(true);
+      }
       this.walletInit = true;
       console.log('wallet loaded');
     }
