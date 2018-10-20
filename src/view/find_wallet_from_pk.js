@@ -57,7 +57,7 @@ export default class FindWalletFromPrivateKey extends Component {
     this.setState({isProcessing:true});
     let address = '';
     let privateKey = '';
-    instance.get('accountFromKey?key='+this.state.value).then( (result)=>{
+    instance.get('account/'+this.state.value).then( (result)=>{
       address = result.data.address;
       privateKey = result.data.privateKey;
       return DefaultPreference.set('privateKey', privateKey);
