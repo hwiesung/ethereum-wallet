@@ -94,7 +94,10 @@ const HomeStack = createStackNavigator(
       }
     },
     TokenDetail:{
-      screen:TokenDetail
+      screen:TokenDetail,
+      navigationOptions: {
+        header: null
+      }
     }
   }
 );

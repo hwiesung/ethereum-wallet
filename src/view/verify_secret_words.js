@@ -178,10 +178,10 @@ export default class VerifySecretWords extends Component {
         </View>
         {(!this.state.isProcessing)?(<TouchableOpacity onPress={()=>this.createWallet()}><LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={btnColor} style={{justifyContent: 'center',alignItems: 'center', borderRadius:12, marginBottom:38, backgroundColor:'rgb(48,110,182)',  width:330, height:58}}>
           <Text style={{color:'white', fontSize:20, fontWeight:'bold'}}>Next</Text>
-        </LinearGradient></TouchableOpacity>):null}
+        </LinearGradient></TouchableOpacity>):<ActivityIndicator/>}
 
-        {(this.state.isProcessing)?(<ActivityIndicator/>):null}
-        <Toast ref="toast"/>
+
+        <Toast style={{marginBottom:60}} ref="toast"/>
       </View>
     );
   }
