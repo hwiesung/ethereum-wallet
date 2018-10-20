@@ -7,23 +7,24 @@ class AppStore {
   @observable user = null;
   @observable username = null;
   @observable wallet = null;
+  @observable price = null;
 
 
   init(user){
     this.uid = user;
     this.user = null;
     this.wallet = null;
+    this.price = null;
     this.userInit= false;
+    this.priceInit = false;
     this.walletInit = false;
     console.log('init User:'+this.uid);
     this.loadData()
   }
 
   @action
-
-
-  @action
   loadData () {
+    this.loadPrice();
     this.loadWallet();
     this.loadUserInfo();
   }
@@ -53,6 +54,25 @@ class AppStore {
           console.log('user added');
         }
       });
+    }
+  }
+
+  @action
+  loadPrice() {
+    if(this.price){
+      console.log('already price is loaded!');
+    }
+    else{
+      firebaseApp.database().ref('/price').on('value', (snap)=>{this.onLoadPriceComplete(snap)});
+    }
+  }
+
+  @action.bound
+  onLoadPriceComplete(snapshot){
+    if(snapshot.val()){
+      this.price = snapshot.val();
+      this.priceInit = true;
+      console.log('price loaded');
     }
   }
 

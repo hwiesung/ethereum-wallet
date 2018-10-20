@@ -13,8 +13,7 @@ export default class WalletScreen extends Component {
     this.state = {
       isProcessing : false,
       privateKey:'',
-      coin: 'ETH',
-      tokens:[]
+      coin: 'ETH'
     };
   }
 
@@ -23,19 +22,23 @@ export default class WalletScreen extends Component {
       this.setState({privateKey:value});
     }));
 
-    let tokens = [];
-    tokens.push({name:'ETH', amount:'300', value:'30,000 USD'});
-    tokens.push({name:'AIN', amount:'100', value:'100 USD'});
-    tokens.push({name:'AFAN', amount:'500', value:'3,000 USD'});
-    this.setState({tokens:tokens});
   }
-  moveDetail(index){
-    console.log(index);
-    this.props.navigation.navigate('TokenDetail', {token:this.state.tokens[index].name});
+
+  moveDetail(token){
+    this.props.navigation.navigate('TokenDetail', {token:token});
   }
 
   render() {
     let address = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet.address : '';
+    let balance = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet.balance : {};
+    let price = (this.props.appStore && this.props.appStore.priceInit) ? this.props.appStore.price : {};
+    let tokens = [];
+    Object.keys(balance).forEach((token)=>{
+      console.log(price);
+      let rate = (price[token])? price[token]:0;
+      tokens.push({name:token, amount:balance[token], value:balance[token]*rate+' USD'});
+    });
+
     return (
       <LinearGradient colors={['#5da7dc', '#306eb6']} style={{ flex:1, alignItems: 'center'}}>
         <View style={{flex:1, marginTop:79, marginLeft:13, marginRight:13, marginBottom:18, flexDirection:'row', borderRadius:15, backgroundColor:'white'}}>
@@ -47,9 +50,9 @@ export default class WalletScreen extends Component {
             </View>
             <View style={{flexDirection:'row', height:4, marginTop:8, marginLeft:18, marginRight:18, backgroundColor:'rgb(37,72,143)'}}/>
             <View style={{flex:1, backgroundColor:'rgb(240,240,240)', marginTop:16, borderBottomLeftRadius:15, borderBottomRightRadius:15}}>
-              {this.state.tokens.map((token, index)=>{
+              {tokens.map((token, index)=>{
                 return (
-                  <TouchableOpacity key={index} style={{flexDirection:'row'}} onPress={()=>this.moveDetail(index)}>
+                  <TouchableOpacity key={index} style={{flexDirection:'row'}} onPress={()=>this.moveDetail(token.name)}>
                     <View style={{flex:1}}>
                       <View style={{height:1, backgroundColor:'rgb(230,230,230)'}}/>
                       <View style={{height:64, alignItems: 'center', flexDirection:'row'}}>
