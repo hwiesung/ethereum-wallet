@@ -14,6 +14,8 @@ import GettingStart from './src/view/getting_start';
 import BackupWallet from './src/view/backup_wallet';
 import CompleteWallet from './src/view/complete_wallet';
 import TokenDetail from './src/view/token_detail';
+import WithdrawalAddress from './src/view/withdrawal_address'
+import WithdrawalToken from './src/view/withdrawal_token';
 import VerifySecretWords from './src/view/verify_secret_words';
 import { Provider } from 'mobx-react/native';
 import appStore from './src/store/AppStore';
@@ -95,6 +97,18 @@ const HomeStack = createStackNavigator(
     },
     TokenDetail:{
       screen:TokenDetail,
+      navigationOptions: {
+        header: null
+      }
+    },
+    Withdrawal:{
+      screen:WithdrawalToken,
+      navigationOptions: {
+        header: null
+      }
+    },
+    WithdrawalAddress:{
+      screen:WithdrawalAddress,
       navigationOptions: {
         header: null
       }

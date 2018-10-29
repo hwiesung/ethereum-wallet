@@ -23,7 +23,7 @@ class AppStore {
     console.log('init User:'+this.uid);
     this.loadData()
   }
-  
+
 
   @action
   loadData () {

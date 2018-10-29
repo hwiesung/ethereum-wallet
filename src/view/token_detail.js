@@ -29,7 +29,8 @@ export default class TokenDetail extends Component {
   }
 
   moveWithdraw(){
-
+    let token = this.props.navigation.getParam('token', {});
+    this.props.navigation.navigate('Withdrawal', {token:token});
   }
 
 

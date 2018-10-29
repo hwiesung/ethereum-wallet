@@ -85,12 +85,11 @@ export default class BackupWallet extends Component {
 
         {(!this.state.isProcessing)?(<TouchableOpacity onPress={()=>this.moveToBackup()}><LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={btnColor} style={{justifyContent: 'center',alignItems: 'center', borderRadius:12, marginBottom:32,  width:330, height:58}}>
           <Text style={{color:'white', fontSize:20, fontWeight:'bold'}} >Continue</Text>
-        </LinearGradient></TouchableOpacity>):null}
+        </LinearGradient></TouchableOpacity>):<ActivityIndicator/>}
 
         <Text style={{marginBottom:52, fontSize:16, color:'rgb(47,109,182)'}} onPress={()=>this.createWallet()}>
           Skip
         </Text>
-        {(this.state.isProcessing)?(<ActivityIndicator/>):null}
 
       </View>
     );
