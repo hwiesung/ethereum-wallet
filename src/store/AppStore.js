@@ -15,17 +15,21 @@ class AppStore {
     this.user = null;
     this.wallet = null;
     this.price = null;
+    this.transactions = null;
     this.userInit= false;
     this.priceInit = false;
     this.walletInit = false;
+    this.transactionInit = false;
     console.log('init User:'+this.uid);
     this.loadData()
   }
+  
 
   @action
   loadData () {
     this.loadPrice();
     this.loadWallet();
+    this.loadTransactions();
     this.loadUserInfo();
   }
 
@@ -118,8 +122,37 @@ class AppStore {
     });
   }
 
+  @action
+  loadTransactions() {
+    if(this.transactionInit){
+      console.log('already transaction is loaded!');
+    }
+    else{
+      console.log('watch trans');
+      firebaseApp.database().ref('/transaction_history/'+this.uid).on('value', (snap)=>{this.onLoadTransactionComplete(snap)});
+    }
+  }
 
-
+  @action.bound
+  onLoadTransactionComplete(snapshot){
+    console.log('tranacions');
+    if(snapshot.val()){
+      this.transactions = snapshot.val();
+      console.log(this.transactions);
+      let before5min = moment().subtract(5, 'minute').utc().valueOf();
+      console.log(before5min+','+this.transactions['ETH'].update_time);
+      if( this.transactions['ETH'].update_time < before5min) {
+        console.log('request sync transactions');
+        Object.keys(this.transactions['ETH'].history).forEach((hashKey) => {
+          firebaseApp.database().ref('/sync/' + this.uid + '/transactions/ETH').set( this.transactions['ETH'].lastBlockNumber);
+        })
+      }
+      this.transactionInit = true;
+    }
+    else{
+      console.log('there is no transactions');
+    }
+  }
 
 
 }
