@@ -44,7 +44,7 @@ export default class TokenDetail extends Component {
 
 
   render() {
-    let tokenName = this.props.navigation.getParam('token', '');
+    let token = this.props.navigation.getParam('token', {});
     let wallet = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet : {};
 
     return (
@@ -53,12 +53,12 @@ export default class TokenDetail extends Component {
           <TouchableOpacity style={{marginLeft:13, width:80}} onPress={()=>this.backNavigation()}>
             <Image source={require('../../assets/btnCommonBackShadow.png')}/>
           </TouchableOpacity>
-          <Text style={{color:'white', fontSize:20, flex:1, marginRight:80, textAlign:'center'}}>{tokenName}</Text>
+          <Text style={{color:'white', fontSize:20, flex:1, marginRight:80, textAlign:'center'}}>{token.name}</Text>
         </View>
 
         <View style={{flex:1, marginTop:25, marginLeft:13, marginRight:13, marginBottom:38, flexDirection:'row', borderRadius:15, backgroundColor:'white'}}>
           <View style={{flex:1, alignItems:'center'}}>
-            <Text style={{marginLeft:21, marginTop:18, fontSize:26, color:'rgb(74,74,74)', fontWeight:'bold'}}>{(wallet.balance?wallet.balance[tokenName]:0)} {tokenName}</Text>
+            <Text style={{marginLeft:21, marginTop:18, fontSize:26, color:'rgb(74,74,74)', fontWeight:'bold'}}>{(wallet.balance?wallet.balance[token.symbol].amount:0)} {token.symbol}</Text>
             <Text style={{height:40, width:264, marginTop:24, textAlign:'center', fontSize:12, color:'rgb(48,110,182)'}}>{wallet.address}</Text>
             <TouchableOpacity onPress={()=>this.moveWithdraw()}>
               <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#5da7dc', '#306eb6']} style={{justifyContent: 'center',alignItems: 'center', borderRadius:12, marginTop:14, width:270, height:58}}>
@@ -75,8 +75,8 @@ export default class TokenDetail extends Component {
                                 <Text style={{fontSize:14, color:'rgb(181,181,181)', marginBottom:2}}>{rowData.amount}</Text>
                                 <Text style={{fontSize:10, color:'rgb(151,151,151)'}}>{rowData.amount}</Text>
                               </View>
-                              <Text style={{fontSize:16, color:'rgb(128,128,128)', fontWeight:'bold', marginRight:12}}>{(wallet.balance?wallet.balance[tokenName]:0)}</Text>
-                              <Text style={{fontSize:16, color:'rgb(128,128,128)', marginRight:12}}>{tokenName}</Text>
+                              <Text style={{fontSize:16, color:'rgb(128,128,128)', fontWeight:'bold', marginRight:12}}>{(wallet.balance?wallet.balance[token.symbol].amount:0)}</Text>
+                              <Text style={{fontSize:16, color:'rgb(128,128,128)', marginRight:12}}>{token.symbol}</Text>
 
                             </View>
 

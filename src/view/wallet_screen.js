@@ -33,10 +33,10 @@ export default class WalletScreen extends Component {
     let balance = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet.balance : {};
     let price = (this.props.appStore && this.props.appStore.priceInit) ? this.props.appStore.price : {};
     let tokens = [];
-    Object.keys(balance).forEach((token)=>{
-      console.log(price);
-      let rate = (price[token])? price[token]:0;
-      tokens.push({name:token, amount:balance[token], value:balance[token]*rate+' USD'});
+    Object.keys(balance).forEach((symbol)=>{
+      let token = balance[symbol];
+      let rate = (price[symbol])? price[symbol]:0;
+      tokens.push({name:token.name, symbol:token.symbol, amount:token.value, value:token.value*rate+' USD'});
     });
 
     return (
@@ -52,12 +52,12 @@ export default class WalletScreen extends Component {
             <View style={{flex:1, backgroundColor:'rgb(240,240,240)', marginTop:16, borderBottomLeftRadius:15, borderBottomRightRadius:15}}>
               {tokens.map((token, index)=>{
                 return (
-                  <TouchableOpacity key={index} style={{flexDirection:'row'}} onPress={()=>this.moveDetail(token.name)}>
+                  <TouchableOpacity key={index} style={{flexDirection:'row'}} onPress={()=>this.moveDetail(token)}>
                     <View style={{flex:1}}>
                       <View style={{height:1, backgroundColor:'rgb(230,230,230)'}}/>
                       <View style={{height:64, alignItems: 'center', flexDirection:'row'}}>
                         <View style={{width:16, height:16, marginLeft:16, borderRadius:90, backgroundColor:'rgb(191,191,191)'}}/>
-                        <Text style={{marginLeft:12, flex:1, color:'rgb(74,74,74)', fontSize:18, fontWeight:'bold'}}>{token.name}</Text>
+                        <Text style={{marginLeft:12, flex:1, color:'rgb(74,74,74)', fontSize:18, fontWeight:'bold'}}>{token.symbol}</Text>
                         <View style={{marginRight:16, alignItems:'flex-end'}}>
                           <Text style={{fontSize:18, color:'rgb(128,128,128)'}}>{token.amount}</Text>
                           <Text style={{fontSize:10, color:'rgb(128,128,128)'}}>{token.value}</Text>
