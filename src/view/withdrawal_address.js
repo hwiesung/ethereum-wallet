@@ -4,9 +4,15 @@ import DefaultPreference from 'react-native-default-preference';
 import axios from 'axios';
 const moment = require('moment');
 import { observer, inject } from 'mobx-react/native'
-import { action } from 'mobx'
+import { NavigationActions, StackActions } from 'react-navigation'
 import LinearGradient from 'react-native-linear-gradient';
-
+import {DURATION} from "react-native-easy-toast";
+import {action} from "mobx/lib/mobx";
+const instance = axios.create({
+  baseURL: 'https://comcom-wallet-api.herokuapp.com/',
+  timeout: 5000,
+  headers: {'Content-Type':'application/json'}
+});
 const ADDRESS_KEY_LENGTH=42;
 @inject("appStore") @observer
 export default class WithdrawalAddress extends Component {
@@ -26,6 +32,18 @@ export default class WithdrawalAddress extends Component {
       this.setState({privateKey:value});
     });
   }
+
+  @action.bound
+  transactionAdded(){
+    console.log('transaction added!!!');
+    this.setState({isProcessing:false});
+    this.props.navigation.dispatch(StackActions.reset({
+      index: 0,
+      key: null,
+      actions: [NavigationActions.navigate({ routeName: 'Main' })]
+    }))
+  }
+
 
   inputText(text){
     let alphaExp = /^[0-9a-zA-Z]+$/;
@@ -55,12 +73,17 @@ export default class WithdrawalAddress extends Component {
   }
 
   sendToken(){
-    //if(this.state.complete){
+    if(this.state.complete && this.state.privateKey){
       let token = this.props.navigation.getParam('token', {});
-      let amount = parseFloat(this.props.navigation.getParam('amount', '0'));
+      let amount = this.props.navigation.getParam('amount', '0');
       let wallet = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet : {};
-      console.log
-   // }
+      let params = {from:wallet.address, to:this.state.value, amount:amount, privateKey:this.state.privateKey};
+      console.log(params);
+      this.setState({isProcessing:true});
+      this.props.appStore.sendTransaction(params, this.transactionAdded);
+
+   }
+
   }
 
   scanQrCode(){
@@ -69,9 +92,6 @@ export default class WithdrawalAddress extends Component {
 
 
   render() {
-
-
-
 
     return (
       <LinearGradient colors={['#5da7dc', '#306eb6']} style={{ flex:1}}>

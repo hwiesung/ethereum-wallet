@@ -1,6 +1,14 @@
 import { observable, autorun, action } from 'mobx'
 import { firebaseApp } from '../firebase'
+import axios from 'axios';
 const moment = require('moment');
+
+
+const instance = axios.create({
+  baseURL: 'https://us-central1-sonder-6287a.cloudfunctions.net/',
+  timeout: 30000,
+  headers: {'Content-Type':'application/json'}
+});
 
 class AppStore {
   @observable uid = null;
@@ -154,6 +162,15 @@ class AppStore {
     }
   }
 
+  @action
+  sendTransaction(params, callback) {
+    params.uid = this.uid;
+    instance.post('send_transaction', params).then( (result)=> {
+      console.log(result.data);
+      callback();
+    });
+
+  }
 
 }
 
