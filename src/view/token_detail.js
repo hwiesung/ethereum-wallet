@@ -46,16 +46,11 @@ export default class TokenDetail extends Component {
       list.push(history[hashKey]);
     }
 
-
     if(list.length>0){
       list.sort((a, b)=>{return  b.timeStamp-a.timeStamp});
     }
-
-
     const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1.hash !== r2.hash});
     let dataSource = ds.cloneWithRows(list);
-
-
 
     return (
       <LinearGradient colors={['#5da7dc', '#306eb6']} style={{ flex:1}}>
@@ -90,16 +85,10 @@ export default class TokenDetail extends Component {
                               </View>
                               <Text style={{fontSize:16, color:'rgb(128,128,128)', fontWeight:'bold', marginRight:12}}>{rowData.value}</Text>
                               <Text style={{fontSize:16, color:'rgb(128,128,128)', marginRight:12}}>{token.symbol}</Text>
-
                             </View>
-
                           </View>
-
                         }/>
             </View>
-
-
-
 
           </View>
 

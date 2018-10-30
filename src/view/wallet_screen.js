@@ -21,7 +21,6 @@ export default class WalletScreen extends Component {
     console.log(DefaultPreference.get('privateKey').then((value)=>{
       this.setState({privateKey:value});
     }));
-
   }
 
   moveDetail(token){
@@ -39,7 +38,8 @@ export default class WalletScreen extends Component {
       tokens.push({name:token.name, symbol:token.symbol, index:token.index, amount:token.value, value:token.value*rate+' USD'});
     });
 
-    tokens.sort((a, b)=>{return a.index > b.index});
+
+    tokens.sort((a, b)=>{return a.index - b.index});
 
     return (
       <LinearGradient colors={['#5da7dc', '#306eb6']} style={{ flex:1, alignItems: 'center'}}>

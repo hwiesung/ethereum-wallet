@@ -11,7 +11,7 @@ const PRIVATE_KEY_LENGTH=66;
 
 const instance = axios.create({
   baseURL: 'https://comcom-wallet-api.herokuapp.com/',
-  timeout: 5000,
+  timeout: 30000,
   headers: {'Content-Type':'application/json'}
 });
 

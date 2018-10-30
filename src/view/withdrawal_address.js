@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, Text, Image, TouchableOpacity, ListView, ActivityIndicator, TextInput} from 'react-native';
+import { View, Text, Image, TouchableOpacity, ActivityIndicator, TextInput} from 'react-native';
 import DefaultPreference from 'react-native-default-preference';
 const moment = require('moment');
 import { observer, inject } from 'mobx-react/native'
@@ -72,11 +72,15 @@ export default class WithdrawalAddress extends Component {
       let token = this.props.navigation.getParam('token', {});
       let amount = this.props.navigation.getParam('amount', '0');
       let wallet = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet : {};
-      let params = {from:wallet.address, to:this.state.value, amount:amount, privateKey:this.state.privateKey};
+      let params = {from:wallet.address, to:this.state.value, amount:amount, privateKey:this.state.privateKey, token:token.symbol};
       console.log(params);
       this.setState({isProcessing:true});
-      this.props.appStore.sendTransaction(params, this.transactionAdded);
-
+      if(token.symbol === 'ETH'){
+        this.props.appStore.sendTransaction(params, this.transactionAdded);
+      }
+      else{
+        this.props.appStore.transferToken(params, this.transactionAdded);
+      }
    }
 
   }

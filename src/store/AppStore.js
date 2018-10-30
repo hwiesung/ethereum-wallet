@@ -174,8 +174,17 @@ class AppStore {
       console.log(result.data);
       callback();
     });
-
   }
+
+  @action
+  transferToken(params, callback) {
+    params.uid = this.uid;
+    instance.post('transfer_token', params).then( (result)=> {
+      console.log(result.data);
+      callback();
+    });
+  }
+
 
 }
 
