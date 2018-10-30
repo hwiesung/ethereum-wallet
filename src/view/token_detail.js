@@ -38,15 +38,18 @@ export default class TokenDetail extends Component {
   render() {
     let token = this.props.navigation.getParam('token', {});
     let wallet = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet : {};
-    let history = (this.props.appStore && this.props.appStore.transactionInit) ? this.props.appStore.transactions['ETH'].history : [];
+    let history = (this.props.appStore && this.props.appStore.transactionInit) ? this.props.appStore.transactions[token.symbol].history : {};
 
     let list = [];
 
-    Object.keys(history).forEach((hashKey)=>{
+    for(let hashKey in history){
       list.push(history[hashKey]);
-    });
+    }
 
-    list.sort((a, b)=>{return  b.timeStamp-a.timeStamp});
+
+    if(list.length>0){
+      list.sort((a, b)=>{return  b.timeStamp-a.timeStamp});
+    }
 
 
     const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1.hash !== r2.hash});
