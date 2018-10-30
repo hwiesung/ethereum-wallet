@@ -36,8 +36,10 @@ export default class WalletScreen extends Component {
     Object.keys(balance).forEach((symbol)=>{
       let token = balance[symbol];
       let rate = (price[symbol])? price[symbol]:0;
-      tokens.push({name:token.name, symbol:token.symbol, amount:token.value, value:token.value*rate+' USD'});
+      tokens.push({name:token.name, symbol:token.symbol, index:token.index, amount:token.value, value:token.value*rate+' USD'});
     });
+
+    tokens.sort((a, b)=>{return a.index > b.index});
 
     return (
       <LinearGradient colors={['#5da7dc', '#306eb6']} style={{ flex:1, alignItems: 'center'}}>

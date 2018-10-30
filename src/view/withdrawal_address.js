@@ -1,18 +1,13 @@
 import React, { Component } from 'react'
 import { View, Text, Image, TouchableOpacity, ListView, ActivityIndicator, TextInput} from 'react-native';
 import DefaultPreference from 'react-native-default-preference';
-import axios from 'axios';
 const moment = require('moment');
 import { observer, inject } from 'mobx-react/native'
 import { NavigationActions, StackActions } from 'react-navigation'
 import LinearGradient from 'react-native-linear-gradient';
-import {DURATION} from "react-native-easy-toast";
+
 import {action} from "mobx/lib/mobx";
-const instance = axios.create({
-  baseURL: 'https://comcom-wallet-api.herokuapp.com/',
-  timeout: 5000,
-  headers: {'Content-Type':'application/json'}
-});
+
 const ADDRESS_KEY_LENGTH=42;
 @inject("appStore") @observer
 export default class WithdrawalAddress extends Component {

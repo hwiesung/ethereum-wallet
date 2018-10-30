@@ -102,8 +102,8 @@ class AppStore {
   onLoadWalletComplete(snapshot){
     if(snapshot.val()){
       this.wallet = snapshot.val();
-      let before5min = moment().subtract(5, 'minute').utc().valueOf();
-      if(this.wallet.update_time < before5min){
+      let before1min = moment().subtract(1, 'minute').utc().valueOf();
+      if(this.wallet.update_time < before1min){
         firebaseApp.database().ref('/sync/'+this.uid+'/balance').set(true);
       }
       this.walletInit = true;
@@ -142,22 +142,27 @@ class AppStore {
   }
 
   @action.bound
-  onLoadTransactionComplete(snapshot){
-    console.log('tranacions');
-    if(snapshot.val()){
+  onLoadTransactionComplete(snapshot) {
+    if (snapshot.val()) {
       this.transactions = snapshot.val();
       console.log(this.transactions);
-      let before5min = moment().subtract(5, 'minute').utc().valueOf();
-      console.log(before5min+','+this.transactions['ETH'].update_time);
-      if( this.transactions['ETH'].update_time < before5min) {
-        console.log('request sync transactions');
-        Object.keys(this.transactions['ETH'].history).forEach((hashKey) => {
-          firebaseApp.database().ref('/sync/' + this.uid + '/transactions/ETH').set( this.transactions['ETH'].lastBlockNumber);
-        })
+      let before1min = moment().subtract(1, 'minute').utc().valueOf();
+      for(let symbol in this.transactions){
+        console.log(before1min + ',' + this.transactions[symbol].update_time);
+        if (this.transactions[symbol].update_time < before1min) {
+          console.log('request sync transactions:'+symbol);
+          if(symbol =='ETH'){
+            firebaseApp.database().ref('/sync/' + this.uid + '/transactions/'+symbol).set(this.transactions[symbol].lastBlockNumber);
+          }
+          else{
+            firebaseApp.database().ref('/sync/' + this.uid + '/token/'+symbol).set(this.transactions[symbol].lastBlockNumber);
+          }
+        }
       }
+
       this.transactionInit = true;
     }
-    else{
+    else {
       console.log('there is no transactions');
     }
   }
