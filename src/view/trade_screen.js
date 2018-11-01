@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
-import { View, Text, Image, TouchableOpacity, TextInput } from 'react-native';
+import {View, Text, Image, TouchableOpacity, TextInput, AppState} from 'react-native';
 import { observer, inject } from 'mobx-react/native'
 import { action } from 'mobx'
 import LinearGradient from 'react-native-linear-gradient';
+import DefaultPreference from "react-native-default-preference";
 
 @inject("appStore") @observer
 export default class TradeScreen extends Component {
@@ -19,13 +20,39 @@ export default class TradeScreen extends Component {
       amount:''
     };
   }
+  componentDidMount(){
+    console.log(DefaultPreference.get('privateKey').then((value)=>{
+      this.setState({privateKey:value});
+    }));
+    this.requestSync();
+    AppState.addEventListener('change', this.handleAppStateChange);
+
+    this._navListener = this.props.navigation.addListener('willFocus', (route) => {
+      this.requestSync();
+    });
+  }
+
+  componentWillUnmount(){
+    AppState.removeEventListener('change', this.handleAppStateChange);
+    this._navListener.remove();
+  }
+
+
+  handleAppStateChange = (nextAppState) => {
+    console.log(nextAppState);
+    if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
+      console.log('App has come to the foreground!')
+      this.requestSync();
+    }
+    this.setState({appState: nextAppState});
+  }
 
   changeMarket(){
 
   }
 
   changeMode(mode){
-    this.setState({mode:mode});
+    this.setState({mode:mode,price:'', amount:''});
   }
 
   moveHistory(){
@@ -66,12 +93,38 @@ export default class TradeScreen extends Component {
     this.setState({amount:text});
   }
 
-  setCurrPrice(){
-    this.setState({price:'100'});
+
+  getCurrentPrice(){
+    let price = (this.props.appStore && this.props.appStore.priceInit) ? this.props.appStore.price : {};
+    return  price[this.state.pay] ? price[this.state.pay][this.state.token].last : 0;
   }
 
+  setCurrentPrice(){
+    this.setState({price:this.getCurrentPrice()+''});
+  }
+
+  getCoinAmount(){
+    let balance = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet.balance : {};
+    return balance[this.state.pay] ? balance[this.state.pay].value : 0;
+  }
+
+  getTokenAmount(){
+    let balance = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet.balance : {};
+    return balance[this.state.token] ? balance[this.state.token].value : 0;
+  }
+
+
   setMaxAmount(){
-    this.setState({amount:'100'});
+    let price = this.state.price ? this.state.price : this.getCurrentPrice();
+    let max = 0;
+    if(this.state.mode === 'Buy'){
+      max = this.getCoinAmount() / parseFloat(price);
+    }
+    else{
+      max = this.getTokenAmount();
+    }
+
+    this.setState({amount:max+'', price:price+''});
   }
 
   getAmount(){
@@ -90,7 +143,15 @@ export default class TradeScreen extends Component {
     return 0;
   }
 
+
+  requestSync(){
+
+  }
+
+
   render() {
+    let price = (this.props.appStore && this.props.appStore.priceInit) ? this.props.appStore.price : {};
+    let diff = price[this.state.pay] ? price[this.state.pay][this.state.token].percentChange : 0;
     return (
       <LinearGradient colors={['#5da7dc', '#306eb6']} style={{ flex:1, alignItems: 'center'}}>
         <View style={{flexDirection:'row', marginTop:10, height:32}}>
@@ -119,21 +180,21 @@ export default class TradeScreen extends Component {
               </Text>
             </View>
             <Text style={{marginTop:20, fontSize:14, color:'rgb(95,173,4)'}}>
-              0.042 / +0.68%
+              {this.getCurrentPrice()} / {diff}%
             </Text>
             <View style={{flexDirection:'row', alignItems:'flex-end'}}>
               <Text style={{fontSize:16, color:'rgb(155,155,155)'}}>Assets</Text>
-              <Text style={{fontSize:24, marginLeft:8, marginRight:8, fontWeight:'bold', color:'rgb(4,4,4)'}}>10000</Text>
-              <Text style={{fontSize:16, color:'rgb(155,155,155)'}}>{this.state.token}</Text>
+              <Text style={{fontSize:24, marginLeft:8, marginRight:8, fontWeight:'bold', color:'rgb(4,4,4)'}}>{(this.state.mode==='Buy'?this.getCoinAmount():this.getTokenAmount())}</Text>
+              <Text style={{fontSize:16, color:'rgb(155,155,155)'}}>{(this.state.mode==='Buy'?this.state.pay:this.state.token)}</Text>
             </View>
 
             <View style={{marginTop:27, flexDirection:'row', alignItems:'center'}}>
               <Text style={{marginLeft:27, width:60, fontSize:14, color:'rgb(155,155,155)'}}>
                 Price
               </Text>
-              <TextInput style={{borderWidth:0, marginLeft:27, marginRight:25, flex:1, fontSize:18, color:'rgb(37, 72, 143)', paddingTop:0, paddingBottom:0, paddingLeft:8, paddingRight:8}} value={this.state.price} keyboardType={'numeric'}  maxLength={20} underlineColorAndroid={'transparent'}
+              <TextInput style={{borderWidth:0, marginLeft:20, marginRight:20, flex:1, fontSize:18, color:'rgb(37, 72, 143)', paddingTop:0, paddingBottom:0, paddingLeft:8, paddingRight:8}} value={this.state.price} keyboardType={'numeric'}  maxLength={20} underlineColorAndroid={'transparent'}
                          onChangeText={(text)=>this.inputPrice(text)} />
-              <TouchableOpacity onPress={()=>this.setCurrPrice()}>
+              <TouchableOpacity onPress={()=>this.setCurrentPrice()}>
               <Text style={{marginRight:25, fontSize:14, fontWeight:'bold', color:'rgb(123,123,123)'}}>
                 Curr
               </Text>
