@@ -24,10 +24,12 @@ class AppStore {
     this.wallet = null;
     this.price = null;
     this.transactions = null;
+    this.orderBook = null;
     this.userInit= false;
     this.priceInit = false;
     this.walletInit = false;
     this.transactionInit = false;
+    this.orderBookInit = false;
     console.log('init User:'+this.uid);
     this.loadData()
   }
@@ -35,10 +37,11 @@ class AppStore {
 
   @action
   loadData () {
+    this.loadUserInfo();
     this.loadPrice();
     this.loadWallet();
     this.loadTransactions();
-    this.loadUserInfo();
+    this.loadOrderBook();
   }
 
   @action
@@ -177,6 +180,28 @@ class AppStore {
     }
     else {
       console.log('there is no transactions');
+    }
+  }
+
+  @action
+  loadOrderBook() {
+    if(this.orderBookInit){
+      console.log('already orderBook is loaded!');
+    }
+    else{
+      console.log('watch orderbook');
+      firebaseApp.database().ref('/order_book').on('value', (snap)=>{this.onLoadOrderBookComplete(snap)});
+    }
+  }
+
+  @action.bound
+  onLoadOrderBookComplete(snapshot) {
+    if (snapshot.val()) {
+      this.orderBook = snapshot.val();
+      this.orderBookInit = true;
+    }
+    else {
+      console.log('there is no orderBook');
     }
   }
 

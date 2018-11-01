@@ -4,6 +4,7 @@ import { observer, inject } from 'mobx-react/native'
 import { action } from 'mobx'
 import LinearGradient from 'react-native-linear-gradient';
 import DefaultPreference from "react-native-default-preference";
+var numeral = require('numeral');
 
 @inject("appStore") @observer
 export default class TradeScreen extends Component {
@@ -12,15 +13,16 @@ export default class TradeScreen extends Component {
     this.state = {
       isProcessing: false,
       privateKey: '',
-      market: 'AIN/ETH',
+      market: 'CYFM/ETH',
       pay:'ETH',
-      token:'AIN',
+      token:'CYFM',
       mode:'Buy',
       price:'',
       amount:''
     };
   }
   componentDidMount(){
+    console.log('trade mount');
     console.log(DefaultPreference.get('privateKey').then((value)=>{
       this.setState({privateKey:value});
     }));
@@ -96,6 +98,7 @@ export default class TradeScreen extends Component {
 
   getCurrentPrice(){
     let price = (this.props.appStore && this.props.appStore.priceInit) ? this.props.appStore.price : {};
+
     return  price[this.state.pay] ? price[this.state.pay][this.state.token].last : 0;
   }
 
@@ -152,6 +155,65 @@ export default class TradeScreen extends Component {
   render() {
     let price = (this.props.appStore && this.props.appStore.priceInit) ? this.props.appStore.price : {};
     let diff = price[this.state.pay] ? price[this.state.pay][this.state.token].percentChange : 0;
+    let orderBook = (this.props.appStore && this.props.appStore.orderBookInit) ? this.props.appStore.orderBook : {};
+    let asks = [];
+    let bids = [];
+
+    let askMax = 0;
+    if(orderBook[this.state.pay][this.state.token] && orderBook[this.state.pay][this.state.token].asks){
+      for(let ask in orderBook[this.state.pay][this.state.token].asks){
+        let order = orderBook[this.state.pay][this.state.token].asks[ask];
+        if(order.price < (1/Math.pow(10,5))){
+          order.priceFormated = numeral(order.price).format('0.00000e+0');
+        }
+        else{
+          order.priceFormated = numeral(order.price).format('0,0.000000');
+        }
+
+        if(order.total > (Math.pow(10,5))){
+          order.amountFormmated = numeral(order.total).format('0.00000e+0');
+        }
+        else{
+          order.amountFormmated = numeral(order.total).format('0,0.0');
+        }
+
+        if(askMax < parseFloat(order.amount)){
+          askMax = parseFloat(order.amount);
+          console.log(askMax);
+        }
+
+        asks.push(order);
+      }
+    }
+
+    let bidMax = 0;
+    if(orderBook[this.state.pay][this.state.token] && orderBook[this.state.pay][this.state.token].bids){
+      for(let bid in orderBook[this.state.pay][this.state.token].bids){
+        let order = orderBook[this.state.pay][this.state.token].bids[bid];
+        if(order.price < (1/Math.pow(10,5))){
+          order.priceFormated = numeral(order.price).format('0.00000e+0');
+        }
+        else{
+          order.priceFormated = numeral(order.price).format('0,0.000000');
+        }
+
+        if(order.total > (Math.pow(10,5))){
+          order.amountFormmated = numeral(order.total).format('0.00000e+0');
+        }
+        else{
+          order.amountFormmated = numeral(order.total).format('0,0.0');
+        }
+        if(bidMax < parseFloat(order.amount)){
+          bidMax = parseFloat(order.amount);
+        }
+        bids.push(order);
+      }
+    }
+
+
+    asks.sort((a,b)=>{return parseFloat(a.price) - parseFloat(b.price)});
+    bids.sort((a,b)=>{return parseFloat(b.price) - parseFloat(a.price)});
+
     return (
       <LinearGradient colors={['#5da7dc', '#306eb6']} style={{ flex:1, alignItems: 'center'}}>
         <View style={{flexDirection:'row', marginTop:10, height:32}}>
@@ -180,11 +242,11 @@ export default class TradeScreen extends Component {
               </Text>
             </View>
             <Text style={{marginTop:20, fontSize:14, color:'rgb(95,173,4)'}}>
-              {this.getCurrentPrice()} / {diff}%
+              {this.getCurrentPrice()} / {numeral(diff).format('0,0.000')}%
             </Text>
             <View style={{flexDirection:'row', alignItems:'flex-end'}}>
               <Text style={{fontSize:16, color:'rgb(155,155,155)'}}>Assets</Text>
-              <Text style={{fontSize:24, marginLeft:8, marginRight:8, fontWeight:'bold', color:'rgb(4,4,4)'}}>{(this.state.mode==='Buy'?this.getCoinAmount():this.getTokenAmount())}</Text>
+              <Text style={{fontSize:24, marginLeft:8, marginRight:8, fontWeight:'bold', color:'rgb(4,4,4)'}}>{numeral(this.state.mode==='Buy'?this.getCoinAmount():this.getTokenAmount()).format('0,0.0000')}</Text>
               <Text style={{fontSize:16, color:'rgb(155,155,155)'}}>{(this.state.mode==='Buy'?this.state.pay:this.state.token)}</Text>
             </View>
 
@@ -236,25 +298,38 @@ export default class TradeScreen extends Component {
         </View>
         <View style={{backgroundColor:'white', height:152, flexDirection:'row'}}>
           <View style={{flex:1}}>
-            <View style={{flexDirection:'row', height:38, backgroundColor:'rgba(182,0,100, 0.1)', alignItems:'center'}}>
-              <Text style={{flex:1, marginLeft:25}}>
-                0.42333
-              </Text>
-              <Text style={{marginRight:12}}>
-                32
-              </Text>
-            </View>
+            {asks.map((ask, index)=>{
+              let barSize = (parseFloat(ask.amount) / askMax) - 0.1;
+              let barWidth = numeral(barSize).format('0%');
+              return <View key={index} style={{flexDirection:'row', height:38, alignItems:'center'}}>
+                <View style={{backgroundColor:'rgba(182,0,100,0.1)', height:38, width:barWidth, position:'absolute', top:0, right:0}} />
+                <Text style={{flex:1, marginLeft:20, fontWeight:'bold', fontSize:14, color:'rgb(208,2,27)'}}>
+                  {ask.priceFormated}
+                </Text>
+                <Text style={{marginRight:12}}>
+                  {ask.amountFormmated}
+                </Text>
+
+              </View>
+            })}
+
 
           </View>
           <View style={{flex:1}}>
-            <View style={{flexDirection:'row', height:38, backgroundColor:'rgba(95,173,4, 0.1)', alignItems:'center'}}>
-              <Text style={{flex:1, marginLeft:18}}>
-                0.44333
-              </Text>
-              <Text style={{marginRight:25}}>
-                10
-              </Text>
-            </View>
+            {bids.map((bid, index)=>{
+              let barSize = (parseFloat(bid.amount) / bidMax) - 0.1;
+              let barWidth = numeral(barSize).format('0%');
+              return <View key={index} style={{flexDirection:'row', height:38, alignItems:'center'}}>
+                <View style={{backgroundColor:'rgba(95,173,4, 0.1)', height:38, width:barWidth, position:'absolute', top:0, left:0}} />
+                <Text style={{flex:1, marginLeft:20, fontSize:14, fontWeight:'bold', color:'rgb(95,173,4)'}}>
+                  {bid.priceFormated}
+                </Text>
+                <Text style={{marginRight:12}}>
+                  {bid.amountFormmated}
+                </Text>
+              </View>
+            })}
+
           </View>
 
 
