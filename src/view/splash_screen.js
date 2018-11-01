@@ -4,6 +4,7 @@ import { observer, inject } from 'mobx-react/native'
 import { firebaseApp } from '../firebase'
 import Toast, {DURATION} from 'react-native-easy-toast'
 import LinearGradient from 'react-native-linear-gradient';
+const timer = require('react-native-timer');
 
 @inject("appStore") @observer
 export default class SplashScreen extends Component {
@@ -12,6 +13,11 @@ export default class SplashScreen extends Component {
     super();
 
   }
+
+  isLoadComplete(){
+    return (this.props.appStore.priceInit && this.props.appStore.walletInit && this.props.appStore.transactionInit);
+  }
+
   componentWillMount() {
     firebaseApp.auth().onAuthStateChanged((user) => {
       if (user ) {
@@ -34,17 +40,30 @@ export default class SplashScreen extends Component {
     });
   }
 
+  componentDidMount(){
+    timer.setInterval(this, 'splash', ()=>{
+      console.log('check');
+      if(this.props.appStore.user){
+        if(this.props.appStore.user.init){
+          console.log("user init");
+          if(this.isLoadComplete()){
+            this.props.navigation.navigate('Home');
+          }
+        }
+        else{
+          this.props.navigation.navigate('Login');
+        }
+      }
+    }, 100)
+  }
+
+  componentWillUnmount() {
+    timer.clearInterval(this);
+  }
+
   render() {
     console.log(this.state);
-    if(this.props.appStore.user){
-      if(this.props.appStore.user.init){
-        this.props.navigation.navigate('Home');
-      }
-      else{
-        this.props.navigation.navigate('Login');
-      }
 
-    }
 
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor:'white' }}>

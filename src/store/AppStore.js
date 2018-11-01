@@ -102,10 +102,6 @@ class AppStore {
   onLoadWalletComplete(snapshot){
     if(snapshot.val()){
       this.wallet = snapshot.val();
-      let before1min = moment().subtract(1, 'minute').utc().valueOf();
-      if(this.wallet.update_time < before1min){
-        firebaseApp.database().ref('/sync/'+this.uid+'/balance').set(true);
-      }
       this.walletInit = true;
       console.log('wallet loaded');
     }
@@ -131,6 +127,38 @@ class AppStore {
   }
 
   @action
+  requestBalanceSync(coin) {
+    let before1min = moment().subtract(1, 'minute').utc().valueOf();
+    if(this.wallet.update_time < before1min){
+      firebaseApp.database().ref('/sync/'+this.uid+'/balance').set(true);
+    }
+  }
+
+  @action
+  requestPriceSync(coin) {
+    let before1min = moment().subtract(1, 'minute').utc().valueOf();
+    if(this.price[coin].update_time < before1min){
+      firebaseApp.database().ref('/sync/'+this.uid+ '/'+coin+'/price').set(true);
+    }
+  }
+
+  @action
+  requestTranactionSync(token) {
+    let before1min = moment().subtract(1, 'minute').utc().valueOf();
+    if (this.transactions[token].update_time < before1min) {
+      console.log('request sync transactions:'+token);
+      if(token =='ETH'){
+        firebaseApp.database().ref('/sync/' + this.uid + '/transactions/'+token).set(this.transactions[token].lastBlockNumber);
+      }
+      else{
+        firebaseApp.database().ref('/sync/' + this.uid + '/token/'+token).set(this.transactions[token].lastBlockNumber);
+      }
+    }
+  }
+
+
+
+  @action
   loadTransactions() {
     if(this.transactionInit){
       console.log('already transaction is loaded!');
@@ -145,21 +173,6 @@ class AppStore {
   onLoadTransactionComplete(snapshot) {
     if (snapshot.val()) {
       this.transactions = snapshot.val();
-      console.log(this.transactions);
-      let before1min = moment().subtract(1, 'minute').utc().valueOf();
-      for(let symbol in this.transactions){
-        console.log(before1min + ',' + this.transactions[symbol].update_time);
-        if (this.transactions[symbol].update_time < before1min) {
-          console.log('request sync transactions:'+symbol);
-          if(symbol =='ETH'){
-            firebaseApp.database().ref('/sync/' + this.uid + '/transactions/'+symbol).set(this.transactions[symbol].lastBlockNumber);
-          }
-          else{
-            firebaseApp.database().ref('/sync/' + this.uid + '/token/'+symbol).set(this.transactions[symbol].lastBlockNumber);
-          }
-        }
-      }
-
       this.transactionInit = true;
     }
     else {

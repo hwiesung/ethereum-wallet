@@ -14,14 +14,22 @@ export default class CompleteWallet extends Component {
   constructor() {
     super();
     this.state = {
-      isProcessing : false,
-      requestSingIn : false
     };
+  }
+
+  isComplete(){
+    return (this.props.appStore.priceInit && this.props.appStore.walletInit && this.props.appStore.transactionInit);
   }
 
 
   moveToHome(){
-    this.props.navigation.navigate('Home');
+    if(this.isComplete()){
+      this.props.navigation.navigate('Home');
+    }
+    else{
+      this.refs.toast.show('Wallet initializing... please wait.', DURATION.LENGTH_SHORT);
+    }
+
   }
 
 
@@ -38,7 +46,7 @@ export default class CompleteWallet extends Component {
         <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#5da7dc', '#306eb6']} style={{justifyContent: 'center',alignItems: 'center', borderRadius:12, marginBottom:38, backgroundColor:'rgb(48,110,182)',  width:330, height:58}}>
           <Text style={{color:'white', fontSize:20, fontWeight:'bold'}} onPress={()=>this.moveToHome()}>Start</Text>
         </LinearGradient>
-
+        <Toast ref="toast"/>
       </View>
     );
   }

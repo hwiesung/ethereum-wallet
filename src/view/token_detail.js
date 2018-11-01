@@ -13,14 +13,14 @@ export default class TokenDetail extends Component {
     super();
 
     this.state = {
-      isProcessing : false
+      isProcessing : false,
+      token:{}
     };
   }
 
   componentDidMount(){
-
-
-
+    let token = this.props.navigation.getParam('token', {});
+    this.props.appStore.requestTranactionSync(token.symbol);
   }
 
   backNavigation(){

@@ -122,9 +122,9 @@ export default class TradeScreen extends Component {
               0.042 / +0.68%
             </Text>
             <View style={{flexDirection:'row', alignItems:'flex-end'}}>
-              <Text style={{fontSize:16, color:'rgb(155,155,155)',spacing:0.8}}>Assets</Text>
+              <Text style={{fontSize:16, color:'rgb(155,155,155)'}}>Assets</Text>
               <Text style={{fontSize:24, marginLeft:8, marginRight:8, fontWeight:'bold', color:'rgb(4,4,4)'}}>10000</Text>
-              <Text style={{fontSize:16, color:'rgb(155,155,155)',spacing:0.8}}>{this.state.token}</Text>
+              <Text style={{fontSize:16, color:'rgb(155,155,155)'}}>{this.state.token}</Text>
             </View>
 
             <View style={{marginTop:27, flexDirection:'row', alignItems:'center'}}>

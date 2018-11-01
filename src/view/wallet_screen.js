@@ -1,10 +1,11 @@
 import React, { Component } from 'react'
-import { View, Text, Image, TouchableOpacity} from 'react-native';
+import { AppState, View, Text, Image, TouchableOpacity} from 'react-native';
 import DefaultPreference from 'react-native-default-preference';
 import axios from 'axios';
 import { observer, inject } from 'mobx-react/native'
 import { action } from 'mobx'
 import LinearGradient from 'react-native-linear-gradient';
+const timer = require('react-native-timer');
 
 @inject("appStore") @observer
 export default class WalletScreen extends Component {
@@ -13,7 +14,8 @@ export default class WalletScreen extends Component {
     this.state = {
       isProcessing : false,
       privateKey:'',
-      coin: 'ETH'
+      coin: 'ETH',
+      appState: AppState.currentState
     };
   }
 
@@ -21,10 +23,37 @@ export default class WalletScreen extends Component {
     console.log(DefaultPreference.get('privateKey').then((value)=>{
       this.setState({privateKey:value});
     }));
+    this.requestSync();
+    AppState.addEventListener('change', this.handleAppStateChange);
+    this._navListener = this.props.navigation.addListener('willFocus', (route) => {
+      this.requestSync();
+    });
   }
+
+  componentWillUnmount(){
+    AppState.removeEventListener('change', this.handleAppStateChange);
+    this._navListener.remove();
+  }
+
+
+  handleAppStateChange = (nextAppState) => {
+
+    console.log(nextAppState);
+    if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
+      console.log('App has come to the foreground!')
+      this.requestSync();
+    }
+    this.setState({appState: nextAppState});
+  }
+
 
   moveDetail(token){
     this.props.navigation.navigate('TokenDetail', {token:token});
+  }
+
+  requestSync(){
+    this.props.appStore.requestBalanceSync();
+    this.props.appStore.requestPriceSync(this.state.coin);
   }
 
   render() {
@@ -34,7 +63,13 @@ export default class WalletScreen extends Component {
     let tokens = [];
     Object.keys(balance).forEach((symbol)=>{
       let token = balance[symbol];
-      let rate = (price[symbol])? price[symbol]:0;
+      let rate = 0;
+      if(this.state.coin === symbol){
+        rate = price[symbol].price;
+      }
+      else{
+        rate = price[this.state.coin][symbol].last * price[this.state.coin].price;
+      }
       tokens.push({name:token.name, symbol:token.symbol, index:token.index, amount:token.value, value:token.value*rate+' USD'});
     });
 
