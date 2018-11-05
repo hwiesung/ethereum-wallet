@@ -18,7 +18,8 @@ export default class TradeScreen extends Component {
       token:'CYFM',
       mode:'Buy',
       price:'',
-      amount:''
+      amount:'',
+      appState: AppState.currentState
     };
   }
   componentDidMount(){
@@ -41,7 +42,7 @@ export default class TradeScreen extends Component {
 
 
   handleAppStateChange = (nextAppState) => {
-    console.log(nextAppState);
+
     if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
       console.log('App has come to the foreground!')
       this.requestSync();
@@ -63,7 +64,6 @@ export default class TradeScreen extends Component {
 
   inputPrice(text){
     let exp = /^[0-9\.]+$/;
-
     if(text.length > 0){
       let available = text.match(exp);
       console.log(available);
@@ -80,7 +80,6 @@ export default class TradeScreen extends Component {
 
   inputAmount(text){
     let exp = /^[0-9]+$/;
-
     if(text.length > 0){
       let available = text.match(exp);
       console.log(available);
