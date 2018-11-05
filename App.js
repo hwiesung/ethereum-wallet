@@ -16,6 +16,7 @@ import GettingStart from './src/view/getting_start';
 import BackupWallet from './src/view/backup_wallet';
 import CompleteWallet from './src/view/complete_wallet';
 import TokenDetail from './src/view/token_detail';
+import EnterPinNumber from './src/view/enter_pin_number';
 import WithdrawalAddress from './src/view/withdrawal_address'
 import WithdrawalToken from './src/view/withdrawal_token';
 import TradeHistory from './src/view/trade_history';
@@ -189,6 +190,9 @@ const RootStack = createSwitchNavigator(
   {
     Splash:{
       screen:SplashScreen
+    },
+    PinNumber:{
+      screen:EnterPinNumber
     },
     Home: {
       screen: Tabs

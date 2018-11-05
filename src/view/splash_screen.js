@@ -47,7 +47,7 @@ export default class SplashScreen extends Component {
         if(this.props.appStore.user.init){
           console.log("user init");
           if(this.isLoadComplete()){
-            this.props.navigation.navigate('Home');
+            this.props.navigation.navigate('PinNumber');
           }
         }
         else{

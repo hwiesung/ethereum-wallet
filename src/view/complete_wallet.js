@@ -24,7 +24,7 @@ export default class CompleteWallet extends Component {
 
   moveToHome(){
     if(this.isComplete()){
-      this.props.navigation.navigate('Home');
+      this.props.navigation.navigate('PinNumber');
     }
     else{
       this.refs.toast.show('Wallet initializing... please wait.', DURATION.LENGTH_SHORT);

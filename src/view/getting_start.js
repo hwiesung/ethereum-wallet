@@ -16,27 +16,7 @@ export default class GettingStart extends Component {
     };
   }
   componentWillMount() {
-    firebaseApp.auth().onAuthStateChanged((user) => {
-      if (user ) {
-        console.log('userStateChanged:'+user.uid);
-        const currentUser = firebaseApp.auth().currentUser;
-        console.log(currentUser);
-        this.props.appStore.init(currentUser.uid);
 
-        this.setState({isProcessing:false, signIn:true});
-
-
-      }
-      else{
-        console.log('not user');
-        firebaseApp.auth().signInAnonymouslyAndRetrieveData().catch((err)=>{
-          if(err){
-            this.refs.toast.show('Failed to Login, Please turn on mobile network.', DURATION.LENGTH_SHORT);
-          }
-        });
-      }
-
-    });
   }
 
   componentWillUnmount(){
