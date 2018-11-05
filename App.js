@@ -68,6 +68,18 @@ const TradeStack = createStackNavigator(
   }
 );
 
+const MyStack = createStackNavigator(
+  {
+    MyHome:{
+      screen:MyScreen,
+      navigationOptions: {
+        header: null
+      }
+    }
+  }
+);
+
+
 const Tabs = createBottomTabNavigator(
   {
     Wallet:{
@@ -77,7 +89,7 @@ const Tabs = createBottomTabNavigator(
       screen:TradeStack
     },
     My:{
-      screen:MyScreen
+      screen:MyStack
     }
   }
 );
