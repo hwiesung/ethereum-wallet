@@ -79,7 +79,7 @@ export default class MyScreen extends Component {
           <Text style={{marginTop:18, marginLeft:18, fontSize:16, color:'white'}}>Total Balance</Text>
           <View style={{flexDirection:'row', alignItems:'flex-end', marginTop:12}}>
             <Text style={{color:'white', fontSize:24, flex:1, textAlign:'right', fontWeight:'bold'}}>{numeral(total).format('0,0.00')}</Text>
-            <Text style={{color:'white', fontWeight:'bold', fontSie:18,marginLeft:8, marginRight:30}}>USD</Text>
+            <Text style={{color:'white', fontWeight:'bold', fontSize:18,marginLeft:8, marginRight:30}}>USD</Text>
           </View>
         </LinearGradient>
         <View style={{flex:1}}>

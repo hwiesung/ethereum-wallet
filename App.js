@@ -1,6 +1,8 @@
 import React from 'react';
 import { createStackNavigator, createBottomTabNavigator, createSwitchNavigator } from 'react-navigation';
 
+import { Image} from 'react-native';
+
 import WalletScreen from './src/view/wallet_screen';
 import TradeScreen from './src/view/trade_screen';
 import MyScreen from './src/view/my_screen';
@@ -88,8 +90,44 @@ const Tabs = createBottomTabNavigator(
     Trade:{
       screen:TradeStack
     },
-    My:{
+    Setting:{
       screen:MyStack
+    }
+  },
+  {
+    initialRoteName:'Wallet',
+    navigationOptions:({navigation})=>{
+      return {
+        tabBarIcon: ({ focused, tintColor }) => {
+          const { routeName } = navigation.state;
+          let icon = focused? require('./assets/icoMenuTradeOn.png'): require('./assets/icoMenuTradeOff.png');
+          if (routeName === 'Wallet') {
+            //icon = require('./assets/icoMenuTradeOff.png');
+          } else if (routeName === 'Trade') {
+          //  icon = './assets/icoMenuTradeOff.png';
+          }
+          else{
+           // icon = './assets/icoMenuTradeOff.png';
+          }
+
+          // You can return any component that you like here! We usually use an
+          // icon component from react-native-vector-icons
+          return <Image source={icon} />;
+        }
+      };
+    },
+    tabBarOptions:{
+      activeTintColor:'rgb(48,110,182)',
+      inactiveTintColor: "rgb(153,153,153)",
+      style: {
+        height: 50,
+        paddingVertical: 5,
+        backgroundColor: "#fff"
+      },
+      labelStyle:{
+        fontSize:10,
+
+      }
     }
   }
 );

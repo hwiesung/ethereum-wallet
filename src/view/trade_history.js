@@ -122,7 +122,7 @@ export default class TradeHistory extends Component {
               Amount / Fee
             </Text>
           </View>
-          <View style={{flex:1, flexDirection:'row', marginLeft:14, marginRight:14,  marginBottom:28}}>
+          <View style={{flex:1, flexDirection:'row', marginLeft:14, marginRight:14,  marginTop:8, marginBottom:28}}>
             <ListView style={{flex:1}} dataSource={dataSource}
                       renderRow={(rowData) =>
                         <View >
