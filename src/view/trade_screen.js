@@ -58,7 +58,7 @@ export default class TradeScreen extends Component {
   }
 
   moveHistory(){
-    console.log('move');
+    this.props.navigation.navigate('TradeHistory', {token:this.state.token, coin:this.state.pay});
   }
 
   inputPrice(text){

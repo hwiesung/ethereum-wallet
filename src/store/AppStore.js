@@ -24,12 +24,14 @@ class AppStore {
     this.wallet = null;
     this.price = null;
     this.transactions = null;
+    this.tradeHistory = null;
     this.orderBook = null;
     this.userInit= false;
     this.priceInit = false;
     this.walletInit = false;
     this.transactionInit = false;
     this.orderBookInit = false;
+    this.tradeHistoryInit = false;
     console.log('init User:'+this.uid);
     this.loadData()
   }
@@ -38,10 +40,11 @@ class AppStore {
   @action
   loadData () {
     this.loadUserInfo();
-    this.loadPrice();
     this.loadWallet();
+    this.loadPrice();
     this.loadTransactions();
     this.loadOrderBook();
+    this.loadTradeHistory();
   }
 
   @action
@@ -116,7 +119,7 @@ class AppStore {
 
   @action
   saveWallet(address, encrypted, mnemonic, privateKey, callback) {
-    let newWallet = {address:address, encrypted:encrypted, mnemonic:mnemonic, privateKey:privateKey};
+    let newWallet = {address:address, encrypted:encrypted};
     firebaseApp.database().ref('/wallets/'+this.uid).set(newWallet, (err)=>{
       if(err){
         console.log('create wallet err');
@@ -144,6 +147,17 @@ class AppStore {
       firebaseApp.database().ref('/sync/'+this.uid+ '/'+coin+'/price').set(true);
     }
   }
+
+  @action
+  requestTradeHistorySync(coin, token) {
+    let before1min = moment().subtract(1, 'minute').utc().valueOf();
+    let lastUpdate = (this.tradeHistory && this.tradeHistory[coin] && this.tradeHistory[coin][token])? this.tradeHistory[coin][token].update_time : 0;
+    let start = (this.tradeHistory && this.tradeHistory[coin] && this.tradeHistory[coin][token])? this.tradeHistory[coin][token].start : 0;
+    if(lastUpdate< before1min){
+      firebaseApp.database().ref('/sync/'+this.uid+ '/'+coin+'/'+token+'/trade_history').set(start);
+    }
+  }
+
 
   @action
   requestTranactionSync(token) {
@@ -180,6 +194,28 @@ class AppStore {
     }
     else {
       console.log('there is no transactions');
+    }
+  }
+
+
+  @action
+  loadTradeHistory() {
+    if(this.tradeHistoryInit){
+      console.log('already trade history is loaded!');
+    }
+    else{
+      firebaseApp.database().ref('/trade_history/'+this.uid).on('value', (snap)=>{this.onLoadTradeHistoryComplete(snap)});
+    }
+  }
+
+  @action.bound
+  onLoadTradeHistoryComplete(snapshot) {
+    if (snapshot.val()) {
+      this.tradeHistory = snapshot.val();
+      this.tradeHistoryInit = true;
+    }
+    else {
+      console.log('there is no history');
     }
   }
 

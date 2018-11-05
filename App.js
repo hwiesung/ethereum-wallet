@@ -16,17 +16,65 @@ import CompleteWallet from './src/view/complete_wallet';
 import TokenDetail from './src/view/token_detail';
 import WithdrawalAddress from './src/view/withdrawal_address'
 import WithdrawalToken from './src/view/withdrawal_token';
+import TradeHistory from './src/view/trade_history';
 import VerifySecretWords from './src/view/verify_secret_words';
 import { Provider } from 'mobx-react/native';
 import appStore from './src/store/AppStore';
 
+
+const WalletStack = createStackNavigator(
+  {
+    WalletHome:{
+      screen:WalletScreen,
+      navigationOptions: {
+        header: null
+      }
+    },
+    TokenDetail:{
+      screen:TokenDetail,
+      navigationOptions: {
+        header: null
+      }
+    },
+    Withdrawal:{
+      screen:WithdrawalToken,
+      navigationOptions: {
+        header: null
+      }
+    },
+    WithdrawalAddress:{
+      screen:WithdrawalAddress,
+      navigationOptions: {
+        header: null
+      }
+    }
+  }
+);
+
+const TradeStack = createStackNavigator(
+  {
+    TradeHome:{
+      screen:TradeScreen,
+      navigationOptions: {
+        header: null
+      }
+    },
+    TradeHistory:{
+      screen:TradeHistory,
+      navigationOptions: {
+        header: null
+      }
+    }
+  }
+);
+
 const Tabs = createBottomTabNavigator(
   {
     Wallet:{
-      screen:WalletScreen
+      screen:WalletStack
     },
     Trade:{
-      screen:TradeScreen
+      screen:TradeStack
     },
     My:{
       screen:MyScreen
@@ -87,41 +135,13 @@ const LoginStack = createStackNavigator(
 );
 
 
-const HomeStack = createStackNavigator(
-  {
-    Main: {
-      screen: Tabs,
-      navigationOptions: {
-        header: null
-      }
-    },
-    TokenDetail:{
-      screen:TokenDetail,
-      navigationOptions: {
-        header: null
-      }
-    },
-    Withdrawal:{
-      screen:WithdrawalToken,
-      navigationOptions: {
-        header: null
-      }
-    },
-    WithdrawalAddress:{
-      screen:WithdrawalAddress,
-      navigationOptions: {
-        header: null
-      }
-    }
-  }
-);
 const RootStack = createSwitchNavigator(
   {
     Splash:{
       screen:SplashScreen
     },
     Home: {
-      screen: HomeStack
+      screen: Tabs
     },
     Login:{
       screen: LoginStack

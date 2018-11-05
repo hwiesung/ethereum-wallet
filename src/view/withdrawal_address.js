@@ -35,7 +35,7 @@ export default class WithdrawalAddress extends Component {
     this.props.navigation.dispatch(StackActions.reset({
       index: 0,
       key: null,
-      actions: [NavigationActions.navigate({ routeName: 'Main' })]
+      actions: [NavigationActions.navigate({ routeName: 'WalletHome' })]
     }))
   }
 
