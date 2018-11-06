@@ -23,6 +23,7 @@ export default class FindWalletFromPrivateKey extends Component {
     this.state = {
       value: '',
       complete: false,
+      coin:'ETH',
       isProcessing:false
     };
   }
@@ -58,14 +59,17 @@ export default class FindWalletFromPrivateKey extends Component {
     let address = '';
     let privateKey = '';
     instance.get('account/'+this.state.value).then( (result)=>{
-      address = result.data.address;
+      console.log(result);
+      address = result.data.address.toLowerCase();
       privateKey = result.data.privateKey;
-      return DefaultPreference.set('privateKey', privateKey);
-
+      let wallets = 0+'/'+address+'/'+privateKey;
+      return DefaultPreference.set('wallets', wallets);
 
     }).then(()=>{
       console.log('pk saved');
-      this.props.appStore.saveWallet(address, '','', privateKey, this.walletCrated);
+      let newWallet = {address:address, mnemonic:'', encrypted:''};
+
+      this.props.appStore.saveWallet(this.state.coin, newWallet, this.walletCrated);
     }).catch((err)=>{
       this.refs.toast.show('Failed to add wallet, try again later.', DURATION.LENGTH_SHORT);
     });
@@ -73,7 +77,7 @@ export default class FindWalletFromPrivateKey extends Component {
 
 
   @action.bound
-  walletCrated(){
+  walletCrated(address){
     console.log('wallet added!!!');
     this.setState({isProcessing:false});
     this.props.navigation.navigate('CompleteWallet', {msg:'Wallet added!'});

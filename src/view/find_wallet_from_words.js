@@ -23,7 +23,8 @@ export default class FindWalletFromWords extends Component {
     this.state = {
       value: '',
       complete: false,
-      isProcessing:false
+      isProcessing:false,
+      coin:'ETH'
     };
   }
 
@@ -70,7 +71,8 @@ export default class FindWalletFromWords extends Component {
       }
     }).then(()=>{
       console.log('pk saved');
-      this.props.appStore.saveWallet(address, '', mnemonic, privateKey, this.walletCrated);
+      let newWallet = {address:address, mnemonic:mnemonic};
+      this.props.appStore.saveWallet(this.state.coin, newWallet, this.walletCrated);
     }).catch((err)=>{
       this.refs.toast.show(err, DURATION.LENGTH_SHORT);
       this.setState({isProcessing:false});

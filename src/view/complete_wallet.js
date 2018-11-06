@@ -23,7 +23,9 @@ export default class CompleteWallet extends Component {
 
 
   moveToHome(){
+    console.log(this.props.appStore);
     if(this.isComplete()){
+
       this.props.navigation.navigate('PinNumber');
     }
     else{

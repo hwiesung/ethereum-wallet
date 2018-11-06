@@ -30,6 +30,7 @@ export default class VerifySecretWords extends Component {
       mnemonic : '',
       origin:[],
       words:[],
+      coin:'ETH',
       selected:{}
     };
   }
@@ -62,7 +63,8 @@ export default class VerifySecretWords extends Component {
     this.setState({isProcessing:true});
     DefaultPreference.set('privateKey', this.state.privateKey).then(()=>{
       console.log('pk saved');
-      this.props.appStore.saveWallet(this.state.address, this.state.encrypted, this.state.mnemonic, this.state.privateKey, this.walletCrated);
+      let newWallet = {address:this.state.address, mnemonic:this.state.mnemonic, encrypted:this.state.encrypted};
+      this.props.appStore.saveWallet(this.state.coin, newWallet,  this.walletCrated);
     });
 
   }

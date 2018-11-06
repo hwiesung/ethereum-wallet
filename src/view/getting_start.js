@@ -4,6 +4,7 @@ import { observer, inject } from 'mobx-react/native'
 import { firebaseApp } from '../firebase'
 import Toast, {DURATION} from 'react-native-easy-toast'
 import LinearGradient from 'react-native-linear-gradient';
+import DefaultPreference from "react-native-default-preference";
 
 @inject("appStore") @observer
 export default class GettingStart extends Component {
@@ -25,8 +26,10 @@ export default class GettingStart extends Component {
 
   moveCreateWallet(){
     console.log(this.props.appStore);
-    if(this.state.signIn){
-      this.props.navigation.navigate('CreateWallet');
+    if(this.props.appStore.userInit){
+      DefaultPreference.set('wallets','').then(()=>{
+        this.props.navigation.navigate('CreateWallet');
+      })
     }
   }
 

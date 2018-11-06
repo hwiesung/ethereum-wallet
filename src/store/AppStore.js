@@ -118,25 +118,25 @@ class AppStore {
   }
 
   @action
-  saveWallet(address, encrypted, mnemonic, privateKey, callback) {
-    let newWallet = {address:address, encrypted:encrypted};
-    firebaseApp.database().ref('/wallets/'+this.uid).set(newWallet, (err)=>{
+  saveWallet(coin, wallet, callback) {
+
+    firebaseApp.database().ref('/wallets/'+this.uid+'/'+coin+'/'+wallet.address).set(wallet, (err)=>{
       if(err){
         console.log('create wallet err');
         console.log(err);
       }
       else{
         console.log('wallet created');
-        callback();
+        callback(wallet.address);
       }
     });
   }
 
   @action
-  requestBalanceSync(coin) {
+  requestBalanceSync(coin, address) {
     let before1min = moment().subtract(1, 'minute').utc().valueOf();
     if(this.wallet.update_time < before1min){
-      firebaseApp.database().ref('/sync/'+this.uid+'/balance').set(true);
+      firebaseApp.database().ref('/sync/'+this.uid+'/'+coin+'/'+address+'/balance').set(true);
     }
   }
 
@@ -149,26 +149,26 @@ class AppStore {
   }
 
   @action
-  requestTradeHistorySync(coin, token) {
+  requestTradeHistorySync(coin, token, address) {
     let before1min = moment().subtract(1, 'minute').utc().valueOf();
     let lastUpdate = (this.tradeHistory && this.tradeHistory[coin] && this.tradeHistory[coin][token])? this.tradeHistory[coin][token].update_time : 0;
     let start = (this.tradeHistory && this.tradeHistory[coin] && this.tradeHistory[coin][token])? this.tradeHistory[coin][token].start : 0;
     if(lastUpdate< before1min){
-      firebaseApp.database().ref('/sync/'+this.uid+ '/'+coin+'/'+token+'/trade_history').set(start);
+      firebaseApp.database().ref('/sync/'+this.uid+ '/'+coin+'/'+address+'/'+token+'/trade_history').set(start);
     }
   }
 
 
   @action
-  requestTranactionSync(token) {
+  requestTranactionSync(coin, token, address) {
     let before1min = moment().subtract(1, 'minute').utc().valueOf();
     if (this.transactions[token].update_time < before1min) {
       console.log('request sync transactions:'+token);
-      if(token =='ETH'){
-        firebaseApp.database().ref('/sync/' + this.uid + '/transactions/'+token).set(this.transactions[token].lastBlockNumber);
+      if(token){
+        firebaseApp.database().ref('/sync/' + this.uid + '/'+coin+'/'+address+'/token/'+token).set(this.transactions[coin][address].token[token].lastBlockNumber);
       }
       else{
-        firebaseApp.database().ref('/sync/' + this.uid + '/token/'+token).set(this.transactions[token].lastBlockNumber);
+        firebaseApp.database().ref('/sync/' + this.uid + '/'+coin+'/'+address+'/transactions').set(this.transactions[coin][address].lastBlockNumber);
       }
     }
   }
@@ -189,6 +189,7 @@ class AppStore {
   @action.bound
   onLoadTransactionComplete(snapshot) {
     if (snapshot.val()) {
+      console.log('transaction updated');
       this.transactions = snapshot.val();
       this.transactionInit = true;
     }
@@ -211,6 +212,7 @@ class AppStore {
   @action.bound
   onLoadTradeHistoryComplete(snapshot) {
     if (snapshot.val()) {
+      console.log('trade updated');
       this.tradeHistory = snapshot.val();
       this.tradeHistoryInit = true;
     }

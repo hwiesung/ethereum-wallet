@@ -23,7 +23,8 @@ export default class BackupWallet extends Component {
     super();
     this.state = {
       agree : false,
-      isProcessing:false
+      isProcessing:false,
+      coin:'ETH'
     };
   }
 
@@ -46,7 +47,8 @@ export default class BackupWallet extends Component {
     })
       .then(()=>{
         console.log('pk saved');
-        this.props.appStore.saveWallet(address, '','', privateKey, this.walletCrated);
+        let newWallet = {address:address, mnemonic:'', encrypted:''};
+        this.props.appStore.saveWallet(this.state.coin, newWallet, this.walletCrated);
       })
       .catch((err)=>{
       console.log(err);

@@ -15,14 +15,21 @@ export default class WalletScreen extends Component {
       isProcessing : false,
       privateKey:'',
       coin: 'ETH',
+      address:'',
       appState: AppState.currentState
     };
   }
 
   componentDidMount(){
-    console.log(DefaultPreference.get('privateKey').then((value)=>{
-      this.setState({privateKey:value});
+    console.log(DefaultPreference.get('wallets').then((value)=>{
+      let wallets = [];
+      if(value){
+        let tokens = value.split('/');
+        this.setState({address:tokens[1]});
+      }
+
     }));
+
     this.requestSync();
     AppState.addEventListener('change', this.handleAppStateChange);
     this._navListener = this.props.navigation.addListener('willFocus', (route) => {
@@ -57,31 +64,40 @@ export default class WalletScreen extends Component {
 
   render() {
     let address = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet.address : '';
-    let balance = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet.balance : {};
+
     let price = (this.props.appStore && this.props.appStore.priceInit) ? this.props.appStore.price : {};
     let tokens = [];
-    Object.keys(balance).forEach((symbol)=>{
-      let token = balance[symbol];
-      let rate = 0;
-      if(this.state.coin === symbol){
-        rate = price[symbol].price;
+    let currentWallet = {};
+    if(this.state.address){
+      let wallet = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet : {};
+      if(wallet[this.state.coin]){
+        console.log();
+        currentWallet = wallet[this.state.coin][this.state.address];
+
+        tokens.push({name:currentWallet.balance.name, coin:this.state.coin, symbol:currentWallet.balance.symbol, index:0, amount:currentWallet.balance.value, value:currentWallet.balance.value*price[this.state.coin].price+' USD'});
+
+        if(currentWallet.token){
+          Object.keys(currentWallet.token).forEach((symbol)=>{
+            let token = currentWallet.token[symbol];
+            let rate = price[this.state.coin][symbol].last * price[this.state.coin].price;
+            tokens.push({name:token.name, coin:this.state.coin, symbol:token.symbol, index:token.index, amount:token.value, value:token.value*rate+' USD'});
+          });
+        }
+
       }
-      else{
-        rate = price[this.state.coin][symbol].last * price[this.state.coin].price;
-      }
-      tokens.push({name:token.name, symbol:token.symbol, index:token.index, amount:token.value, value:token.value*rate+' USD'});
-    });
+    }
+
 
 
     tokens.sort((a, b)=>{return a.index - b.index});
-
+    console.log(currentWallet);
     return (
       <LinearGradient colors={['#5da7dc', '#306eb6']} style={{ flex:1, alignItems: 'center'}}>
         <View style={{flex:1, marginTop:79, marginLeft:13, marginRight:13, marginBottom:18, flexDirection:'row', borderRadius:15, backgroundColor:'white'}}>
           <View style={{flex:1}}>
-            <Text style={{marginLeft:21, marginTop:21, fontSize:26, color:'rgb(74,74,74)', fontWeight:'bold'}}>{this.state.coin} Wallet</Text>
+            <Text style={{marginLeft:21, marginTop:21, fontSize:26, color:'rgb(74,74,74)', fontWeight:'bold'}}>{currentWallet.balance?currentWallet.balance.name:this.state.coin} Wallet</Text>
             <View style={{marginTop:21, flexDirection:'row'}}>
-              <Text style={{flex:1, marginLeft:30, fontSize:12, color:'rgb(48,110,182)'}}>{address}</Text>
+              <Text style={{flex:1, marginLeft:30, fontSize:12, color:'rgb(48,110,182)'}}>{currentWallet.address}</Text>
               <Image style={{marginLeft:18, marginRight:30, marginTop:4}} source={require('../../assets/btnDepositQrBig.png')}/>
             </View>
             <View style={{flexDirection:'row', height:4, marginTop:8, marginLeft:18, marginRight:18, backgroundColor:'rgb(37,72,143)'}}/>
