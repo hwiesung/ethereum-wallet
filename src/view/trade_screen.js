@@ -13,10 +13,11 @@ export default class TradeScreen extends Component {
     this.state = {
       isProcessing: false,
       privateKey: '',
-      market: 'CYFM/ETH',
+      market: 'FANCO/ETH',
       pay:'ETH',
-      token:'CYFM',
+      token:'FANCO',
       mode:'Buy',
+      address:'',
       price:'',
       amount:'',
       appState: AppState.currentState
@@ -24,9 +25,13 @@ export default class TradeScreen extends Component {
   }
   componentDidMount(){
     console.log('trade mount');
-    console.log(DefaultPreference.get('privateKey').then((value)=>{
-      this.setState({privateKey:value});
-    }));
+    DefaultPreference.get('wallets').then((value)=>{
+      let wallets = [];
+      if(value){
+        let tokens = value.split('/');
+        this.setState({address:tokens[1]});
+      }
+    });
     this.requestSync();
     AppState.addEventListener('change', this.handleAppStateChange);
 
@@ -106,13 +111,13 @@ export default class TradeScreen extends Component {
   }
 
   getCoinAmount(){
-    let balance = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet.balance : {};
-    return balance[this.state.pay] ? balance[this.state.pay].value : 0;
+    let wallet = (this.props.appStore && this.props.appStore.walletInit && this.props.appStore.wallet[this.state.pay][this.state.address]) ? this.props.appStore.wallet[this.state.pay][this.state.address] : {};
+    return wallet.balance ? parseFloat(wallet.balance.value): 0;
   }
 
   getTokenAmount(){
-    let balance = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet.balance : {};
-    return balance[this.state.token] ? balance[this.state.token].value : 0;
+    let wallet = (this.props.appStore && this.props.appStore.walletInit && this.props.appStore.wallet[this.state.pay][this.state.address]) ? this.props.appStore.wallet[this.state.pay][this.state.address] : {};
+    return wallet.token && wallet.token[this.state.token] ? wallet.token[this.state.token].value : 0;
   }
 
 
@@ -159,7 +164,7 @@ export default class TradeScreen extends Component {
     let bids = [];
 
     let askMax = 0;
-    if(orderBook[this.state.pay][this.state.token] && orderBook[this.state.pay][this.state.token].asks){
+    if(orderBook[this.state.pay] && orderBook[this.state.pay][this.state.token] && orderBook[this.state.pay][this.state.token].asks){
       for(let ask in orderBook[this.state.pay][this.state.token].asks){
         let order = orderBook[this.state.pay][this.state.token].asks[ask];
         if(order.price < (1/Math.pow(10,5))){
@@ -186,7 +191,7 @@ export default class TradeScreen extends Component {
     }
 
     let bidMax = 0;
-    if(orderBook[this.state.pay][this.state.token] && orderBook[this.state.pay][this.state.token].bids){
+    if(orderBook[this.state.pay] && orderBook[this.state.pay][this.state.token] && orderBook[this.state.pay][this.state.token].bids){
       for(let bid in orderBook[this.state.pay][this.state.token].bids){
         let order = orderBook[this.state.pay][this.state.token].bids[bid];
         if(order.price < (1/Math.pow(10,5))){

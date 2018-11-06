@@ -16,12 +16,19 @@ export default class MyScreen extends Component {
       isProcessing : false,
       privateKey:'',
       coin: 'ETH',
+      address:'',
       appState: AppState.currentState
     };
   }
 
   componentDidMount(){
-
+    DefaultPreference.get('wallets').then((value)=>{
+      let wallets = [];
+      if(value){
+        let tokens = value.split('/');
+        this.setState({address:tokens[1]});
+      }
+    });
   }
 
   componentWillUnmount(){
@@ -41,7 +48,7 @@ export default class MyScreen extends Component {
 
 
   render() {
-    let balance = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet.balance : {};
+    let wallets = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet[this.state.coin] : {};
     let price = (this.props.appStore && this.props.appStore.priceInit) ? this.props.appStore.price : {};
 
 
@@ -55,16 +62,15 @@ export default class MyScreen extends Component {
     ];
 
     let total = 0;
-    Object.keys(balance).forEach((symbol)=>{
-      let token = balance[symbol];
-      let rate = 0;
-      if(this.state.coin === symbol){
-        rate = price[symbol].price;
+    Object.keys(wallets).forEach((address)=>{
+      let wallet = wallets[address];
+      console.log(wallet);
+      total += ( price[this.state.coin].price * parseFloat(wallet.balance.value) );
+
+      for( let symbol in wallet.token ){
+        total += ( price[this.state.coin][symbol].last * price[this.state.coin].price * parseFloat(wallet.token[symbol].value) );
       }
-      else{
-        rate = price[this.state.coin][symbol].last * price[this.state.coin].price;
-      }
-      total+=token.value*rate;
+     
     });
 
 

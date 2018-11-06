@@ -20,7 +20,8 @@ export default class TokenDetail extends Component {
 
   componentDidMount(){
     let token = this.props.navigation.getParam('token', {});
-    this.props.appStore.requestTranactionSync(token.symbol);
+    console.log(token);
+    this.props.appStore.requestTranactionSync(token.coin, token.symbol, token.address);
   }
 
   backNavigation(){
@@ -37,8 +38,18 @@ export default class TokenDetail extends Component {
 
   render() {
     let token = this.props.navigation.getParam('token', {});
-    let wallet = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet : {};
-    let history = (this.props.appStore && this.props.appStore.transactionInit) ? this.props.appStore.transactions[token.symbol].history : {};
+    let wallet = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet[token.coin][token.address] : {};
+    console.log(wallet);
+    let history = {};
+    let balance = '';
+    if(token.coin === token.symbol){ //It is coin
+      history = (this.props.appStore && this.props.appStore.transactionInit) ? this.props.appStore.transactions[token.coin][token.address].history : {};
+      balance = wallet.balance ? wallet.balance.value: '';
+    }
+    else{  //It is token
+      history = (this.props.appStore && this.props.appStore.transactionInit) ? this.props.appStore.transactions[token.coin][token.address].token[token.symbol].history : {};
+      balance = wallet.token[token.symbol] ? wallet.token[token.symbol].value: '';
+    }
 
     let list = [];
 
@@ -49,6 +60,7 @@ export default class TokenDetail extends Component {
     if(list.length>0){
       list.sort((a, b)=>{return  b.timeStamp-a.timeStamp});
     }
+    console.log(list);
     const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1.hash !== r2.hash});
     let dataSource = ds.cloneWithRows(list);
 
@@ -63,7 +75,7 @@ export default class TokenDetail extends Component {
 
         <View style={{flex:1, marginTop:25, marginLeft:13, marginRight:13, marginBottom:38, flexDirection:'row', borderRadius:15, backgroundColor:'white'}}>
           <View style={{flex:1, alignItems:'center'}}>
-            <Text style={{marginLeft:21, marginTop:18, fontSize:26, color:'rgb(74,74,74)', fontWeight:'bold'}}>{(wallet.balance?wallet.balance[token.symbol].value:0)} {token.symbol}</Text>
+            <Text style={{marginLeft:21, marginTop:18, fontSize:26, color:'rgb(74,74,74)', fontWeight:'bold'}}>{balance} {token.symbol}</Text>
             <Text style={{height:40, width:264, marginTop:24, textAlign:'center', fontSize:12, color:'rgb(48,110,182)'}}>{wallet.address}</Text>
             <TouchableOpacity onPress={()=>this.moveWithdraw()}>
               <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#5da7dc', '#306eb6']} style={{justifyContent: 'center',alignItems: 'center', borderRadius:12, marginTop:14, width:270, height:58}}>

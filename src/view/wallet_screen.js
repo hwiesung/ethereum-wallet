@@ -21,14 +21,14 @@ export default class WalletScreen extends Component {
   }
 
   componentDidMount(){
-    console.log(DefaultPreference.get('wallets').then((value)=>{
+    DefaultPreference.get('wallets').then((value)=>{
       let wallets = [];
       if(value){
         let tokens = value.split('/');
         this.setState({address:tokens[1]});
       }
 
-    }));
+    });
 
     this.requestSync();
     AppState.addEventListener('change', this.handleAppStateChange);
@@ -54,6 +54,7 @@ export default class WalletScreen extends Component {
 
 
   moveDetail(token){
+    token.address = this.state.address;
     this.props.navigation.navigate('TokenDetail', {token:token});
   }
 
@@ -63,8 +64,6 @@ export default class WalletScreen extends Component {
   }
 
   render() {
-    let address = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet.address : '';
-
     let price = (this.props.appStore && this.props.appStore.priceInit) ? this.props.appStore.price : {};
     let tokens = [];
     let currentWallet = {};

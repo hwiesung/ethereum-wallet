@@ -162,13 +162,20 @@ class AppStore {
   @action
   requestTranactionSync(coin, token, address) {
     let before1min = moment().subtract(1, 'minute').utc().valueOf();
-    if (this.transactions[token].update_time < before1min) {
+    let updateTime = 0;
+    if(coin === token){
+      updateTime = this.transactions[coin][address].update_time;
+    }
+    else{
+      updateTime = this.transactions[coin][address].token[token].update_time;
+    }
+    if (updateTime < before1min) {
       console.log('request sync transactions:'+token);
-      if(token){
-        firebaseApp.database().ref('/sync/' + this.uid + '/'+coin+'/'+address+'/token/'+token).set(this.transactions[coin][address].token[token].lastBlockNumber);
+      if(coin === token){
+        firebaseApp.database().ref('/sync/' + this.uid + '/'+coin+'/'+address+'/transactions').set(this.transactions[coin][address].lastBlockNumber);
       }
       else{
-        firebaseApp.database().ref('/sync/' + this.uid + '/'+coin+'/'+address+'/transactions').set(this.transactions[coin][address].lastBlockNumber);
+        firebaseApp.database().ref('/sync/' + this.uid + '/'+coin+'/'+address+'/token/'+token).set(this.transactions[coin][address].token[token].lastBlockNumber);
       }
     }
   }
