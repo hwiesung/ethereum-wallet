@@ -21,9 +21,32 @@ import WithdrawalAddress from './src/view/withdrawal_address'
 import WithdrawalToken from './src/view/withdrawal_token';
 import TradeHistory from './src/view/trade_history';
 import VerifySecretWords from './src/view/verify_secret_words';
+import ManageWallet from './src/view/manage_wallet';
 import { Provider } from 'mobx-react/native';
 import appStore from './src/store/AppStore';
 
+
+
+const AddWalletStack = createStackNavigator({
+  AddWallet: {
+    screen: AddExistWallet,
+    navigationOptions: {
+      header: null
+    }
+  },
+  FindWalletPrivateKey:{
+    screen:FindWalletFromPrivateKey,
+    navigationOptions: {
+      header: null
+    }
+  },
+  FindWalletWords:{
+    screen:FindWalletFromWords,
+    navigationOptions: {
+      header: null
+    }
+  }
+});
 
 const WalletStack = createStackNavigator(
   {
@@ -75,6 +98,30 @@ const MyStack = createStackNavigator(
   {
     MyHome:{
       screen:MyScreen,
+      navigationOptions: {
+        header: null
+      }
+    },
+    ManageWallet:{
+      screen:ManageWallet,
+      navigationOptions: {
+        header: null
+      }
+    },
+    AddWallet: {
+      screen: AddExistWallet,
+      navigationOptions: {
+        header: null
+      }
+    },
+    FindWalletPrivateKey:{
+      screen:FindWalletFromPrivateKey,
+      navigationOptions: {
+        header: null
+      }
+    },
+    FindWalletWords: {
+      screen: FindWalletFromWords,
       navigationOptions: {
         header: null
       }
@@ -134,26 +181,6 @@ const Tabs = createBottomTabNavigator(
 );
 
 
-const AddWalletStack = createStackNavigator({
-  AddWallet: {
-    screen: AddExistWallet,
-    navigationOptions: {
-      header: null
-    }
-  },
-  FindWalletPrivateKey:{
-    screen:FindWalletFromPrivateKey,
-    navigationOptions: {
-      header: null
-    }
-  },
-  FindWalletWords:{
-    screen:FindWalletFromWords,
-    navigationOptions: {
-      header: null
-    }
-  }
-});
 
 
 const LoginStack = createStackNavigator(
@@ -166,9 +193,15 @@ const LoginStack = createStackNavigator(
     },
     CreateWallet:{
       screen:CreateWalletScreen,
+      navigationOptions: {
+        header: null
+      }
     },
     BackupWallet:{
-      screen:BackupWallet
+      screen:BackupWallet,
+      navigationOptions: {
+        header: null
+      }
     },
     FindWallet: {
       screen: AddWalletStack,

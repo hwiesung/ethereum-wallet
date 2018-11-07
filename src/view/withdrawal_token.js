@@ -58,9 +58,17 @@ export default class WithdrawalToken extends Component {
 
   render() {
     let token = this.props.navigation.getParam('token', {});
-    let wallet = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet : {};
+    let wallet = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet[token.coin][token.address] : {};
 
+    let balance = '';
 
+    if(token.coin===token.symbol){
+      balance = wallet.balance?wallet.balance.value:'';
+    }
+    else{
+      balance = wallet.token && wallet.token[token.symbol]?wallet.token[token.symbol].value:'';
+    }
+    console.log(wallet);
 
     return (
       <LinearGradient colors={['#5da7dc', '#306eb6']} style={{ flex:1}}>
@@ -88,9 +96,9 @@ export default class WithdrawalToken extends Component {
 
             <View style={{flexDirection:'row', marginTop:10, marginBottom:86, marginLeft:22, marginRight:25}}>
               <Text style={{flex:1}}>
-                My Balance : {(wallet.balance?wallet.balance[token.symbol].value:0)} {token.symbol}
+                My Balance : {balance} {token.symbol}
               </Text>
-              <TouchableOpacity onPress={()=>this.inputText((wallet.balance?wallet.balance[token.symbol].value+'':'0'))}>
+              <TouchableOpacity onPress={()=>this.inputText(balance)}>
                 <Text>Send All</Text>
               </TouchableOpacity>
             </View>

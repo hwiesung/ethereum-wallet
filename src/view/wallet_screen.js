@@ -15,20 +15,12 @@ export default class WalletScreen extends Component {
       isProcessing : false,
       privateKey:'',
       coin: 'ETH',
-      address:'',
+      selected:0,
       appState: AppState.currentState
     };
   }
 
   componentDidMount(){
-    DefaultPreference.get('wallets').then((value)=>{
-      let wallets = [];
-      if(value){
-        let tokens = value.split('/');
-        this.setState({address:tokens[1]});
-      }
-
-    });
 
     this.requestSync();
     AppState.addEventListener('change', this.handleAppStateChange);
@@ -54,7 +46,7 @@ export default class WalletScreen extends Component {
 
 
   moveDetail(token){
-    token.address = this.state.address;
+    console.log(token);
     this.props.navigation.navigate('TokenDetail', {token:token});
   }
 
@@ -65,13 +57,24 @@ export default class WalletScreen extends Component {
 
   render() {
     let price = (this.props.appStore && this.props.appStore.priceInit) ? this.props.appStore.price : {};
+    let localWallets = this.props.appStore ?this.props.appStore.localWallets : {};
     let tokens = [];
-    let currentWallet = {};
-    if(this.state.address){
+    console.log(localWallets);
+    let currentAddress = '';
+    for(let address in localWallets){
+      console.log(localWallets[address]);
+      if(localWallets[address].index === this.state.selected){
+        currentAddress = address;
+        break;
+      }
+    }
+    console.log(currentAddress);
+    let currentWallet ={};
+
+    if(currentAddress){
       let wallet = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet : {};
       if(wallet[this.state.coin]){
-        console.log();
-        currentWallet = wallet[this.state.coin][this.state.address];
+        currentWallet = wallet[this.state.coin][currentAddress];
 
         tokens.push({name:currentWallet.balance.name, coin:this.state.coin, symbol:currentWallet.balance.symbol, index:0, amount:currentWallet.balance.value, value:currentWallet.balance.value*price[this.state.coin].price+' USD'});
 
@@ -85,8 +88,6 @@ export default class WalletScreen extends Component {
 
       }
     }
-
-
 
     tokens.sort((a, b)=>{return a.index - b.index});
     console.log(currentWallet);
@@ -102,6 +103,7 @@ export default class WalletScreen extends Component {
             <View style={{flexDirection:'row', height:4, marginTop:8, marginLeft:18, marginRight:18, backgroundColor:'rgb(37,72,143)'}}/>
             <View style={{flex:1, backgroundColor:'rgb(240,240,240)', marginTop:16, borderBottomLeftRadius:15, borderBottomRightRadius:15}}>
               {tokens.map((token, index)=>{
+                token.address = currentAddress;
                 return (
                   <TouchableOpacity key={index} style={{flexDirection:'row'}} onPress={()=>this.moveDetail(token)}>
                     <View style={{flex:1}}>

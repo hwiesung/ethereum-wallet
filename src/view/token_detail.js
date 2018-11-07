@@ -87,11 +87,11 @@ export default class TokenDetail extends Component {
                           <View >
                             <View style={{flex:1, backgroundColor:'rgb(230,230,230)', height:1}}/>
                             <View style={{flexDirection:'row', height:60, alignItems:'center'}}>
-                              <Image style={{marginLeft:8}} source={rowData.isSend?require('../../assets/icHistoryDwIn.png'):require('../../assets/icHistoryDwOut.png')}/>
+                              <Image style={{marginLeft:8}} source={rowData.isSend?require('../../assets/icHistoryDwOut.png'):require('../../assets/icHistoryDwIn.png')}/>
                               <View style={{flex:1, marginLeft:6}} >
                                 {rowData.isSend?
-                                  (<Text style={{fontSize:14, color:'rgb(181,181,181)', marginBottom:2}}>Deposit</Text>):
-                                    <Text style={{fontSize:14, color:'rgb(48,110,182)', marginBottom:2}}>Withdrawal</Text>}
+                                  (<Text style={{fontSize:14, color:'rgb(48,110,182)', marginBottom:2}}>Withdrawal</Text>):
+                                    <Text style={{fontSize:14, color:'rgb(181,181,181)', marginBottom:2}}>Deposit</Text>}
 
                                 <Text style={{fontSize:10, color:'rgb(151,151,151)'}}>{moment(rowData.timeStamp,'X').format()}</Text>
                               </View>

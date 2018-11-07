@@ -7,6 +7,7 @@ import DefaultPreference from "react-native-default-preference";
 import Toast, {DURATION} from 'react-native-easy-toast'
 import { observer, inject } from 'mobx-react/native'
 import { action } from 'mobx'
+import {NavigationActions, StackActions} from "react-navigation";
 const PRIVATE_KEY_LENGTH=66;
 
 const instance = axios.create({
@@ -62,25 +63,33 @@ export default class FindWalletFromPrivateKey extends Component {
       console.log(result);
       address = result.data.address.toLowerCase();
       privateKey = result.data.privateKey;
-      let wallets = 0+'/'+address+'/'+privateKey;
-      return DefaultPreference.set('wallets', wallets);
 
-    }).then(()=>{
-      console.log('pk saved');
       let newWallet = {address:address, mnemonic:'', encrypted:''};
 
-      this.props.appStore.saveWallet(this.state.coin, newWallet, this.walletCrated);
+      this.props.appStore.saveWallet(this.state.coin, newWallet, privateKey, this.walletCreated);
     }).catch((err)=>{
       this.refs.toast.show('Failed to add wallet, try again later.', DURATION.LENGTH_SHORT);
+      this.setState({isProcessing:false});
     });
   }
 
 
   @action.bound
-  walletCrated(address){
+  walletCreated(address){
     console.log('wallet added!!!');
-    this.setState({isProcessing:false});
-    this.props.navigation.navigate('CompleteWallet', {msg:'Wallet added!'});
+
+    if(Object.keys(this.props.appStore.localWallets).length > 1){
+      this.props.navigation.dispatch(StackActions.reset({
+        index: 0,
+        key: null,
+        actions: [NavigationActions.navigate({ routeName: 'MyHome' })]
+      }));
+    }
+    else{
+      this.props.navigation.navigate('CompleteWallet', {msg:'Wallet added!'});
+    }
+
+
   }
 
   render() {

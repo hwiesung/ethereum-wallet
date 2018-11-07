@@ -8,6 +8,7 @@ import Toast, {DURATION} from 'react-native-easy-toast'
 
 import DefaultPreference from 'react-native-default-preference';
 import LinearGradient from 'react-native-linear-gradient';
+import {NavigationActions, StackActions} from "react-navigation";
 const instance = axios.create({
   baseURL: 'https://us-central1-sonder-6287a.cloudfunctions.net/',
   timeout: 1000,
@@ -61,12 +62,9 @@ export default class VerifySecretWords extends Component {
     }
 
     this.setState({isProcessing:true});
-    DefaultPreference.set('privateKey', this.state.privateKey).then(()=>{
-      console.log('pk saved');
-      let newWallet = {address:this.state.address, mnemonic:this.state.mnemonic, encrypted:this.state.encrypted};
-      this.props.appStore.saveWallet(this.state.coin, newWallet,  this.walletCrated);
-    });
 
+    let newWallet = {address:this.state.address, mnemonic:this.state.mnemonic, encrypted:this.state.encrypted};
+    this.props.appStore.saveWallet(this.state.coin, newWallet, this.state.privateKey, this.walletCreated);
   }
 
   selectWord(word){
@@ -106,9 +104,19 @@ export default class VerifySecretWords extends Component {
   }
 
   @action.bound
-  walletCrated(){
+  walletCreated(){
     console.log('wallet created!!!');
-    this.props.navigation.navigate('CompleteWallet', {msg:'Wallet created!'});
+    if(Object.keys(this.props.appStore.localWallets).length > 1){
+      this.props.navigation.dispatch(StackActions.reset({
+        index: 0,
+        key: null,
+        actions: [NavigationActions.navigate({ routeName: 'MyHome' })]
+      }));
+    }
+    else{
+      this.props.navigation.navigate('CompleteWallet', {msg:'Wallet added!'});
+    }
+
   }
 
 

@@ -22,13 +22,7 @@ export default class MyScreen extends Component {
   }
 
   componentDidMount(){
-    DefaultPreference.get('wallets').then((value)=>{
-      let wallets = [];
-      if(value){
-        let tokens = value.split('/');
-        this.setState({address:tokens[1]});
-      }
-    });
+
   }
 
   componentWillUnmount(){
@@ -36,8 +30,11 @@ export default class MyScreen extends Component {
   }
 
 
-  moveMenu(munu){
-    //this.props.navigation.navigate('TokenDetail', {token:token});
+  moveMenu(menu){
+    if(menu.action){
+      menu.action();
+    }
+
   }
 
   requestSync(){
@@ -53,25 +50,27 @@ export default class MyScreen extends Component {
 
 
     const settingMenu = [
-      {title:'Profile', value:this.props.appStore.user.nickname}
-      ,{title:'General'}
-      ,{title:'Wallets'}
-      ,{title:'Security'}
-      ,{title:'Support'}
+      {title:'Profile', value:this.props.appStore.user.nickname, action:()=>{}}
+      ,{title:'General', action:()=>{}}
+      ,{title:'Wallets',value:Object.keys(wallets).length, action:()=>{
+          this.props.navigation.navigate('ManageWallet');
+        }}
+      ,{title:'Security', action:()=>{}}
+      ,{title:'Support', action:()=>{}}
 
     ];
 
     let total = 0;
-    Object.keys(wallets).forEach((address)=>{
-      let wallet = wallets[address];
-      console.log(wallet);
-      total += ( price[this.state.coin].price * parseFloat(wallet.balance.value) );
-
-      for( let symbol in wallet.token ){
-        total += ( price[this.state.coin][symbol].last * price[this.state.coin].price * parseFloat(wallet.token[symbol].value) );
-      }
-     
-    });
+    // Object.keys(wallets).forEach((address)=>{
+    //   let wallet = wallets[address];
+    //   console.log(wallet);
+    //   total += ( price[this.state.coin].price * parseFloat(wallet.balance.value) );
+    //
+    //   for( let symbol in wallet.token ){
+    //     total += ( price[this.state.coin][symbol].last * price[this.state.coin].price * parseFloat(wallet.token[symbol].value) );
+    //   }
+    //
+    // });
 
 
 
@@ -96,7 +95,7 @@ export default class MyScreen extends Component {
               settingMenu.map((menu, index)=>{
                 return (
                   <View key={index} style={{flexDirection:'row'}}>
-                    <TouchableOpacity style={{flex:1}} onPress={()=>this.moveMenu(index)}>
+                    <TouchableOpacity style={{flex:1}} onPress={()=>this.moveMenu(menu)}>
                       <View style={{flexDirection:'row', height:60, alignItems:'center'}}>
                         <Text style={{ marginLeft:22, flex:1, fontSize:18, fontWeight:'bold', color:'rgb(74,74,74)'}}>{menu.title}</Text>
                         <Text style={{marginRight:20, fontSize:18, color:'rgb(155,155,155)'}}> {menu.value} > </Text>

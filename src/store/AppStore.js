@@ -2,7 +2,7 @@ import { observable, autorun, action } from 'mobx'
 import { firebaseApp } from '../firebase'
 import axios from 'axios';
 const moment = require('moment');
-
+import DefaultPreference from 'react-native-default-preference';
 
 const instance = axios.create({
   baseURL: 'https://us-central1-sonder-6287a.cloudfunctions.net/',
@@ -22,6 +22,7 @@ class AppStore {
     this.uid = user;
     this.user = null;
     this.wallet = null;
+    this.localWallets = {};
     this.price = null;
     this.transactions = null;
     this.tradeHistory = null;
@@ -39,12 +40,28 @@ class AppStore {
 
   @action
   loadData () {
+    this.loadLocalWallet();
     this.loadUserInfo();
     this.loadWallet();
     this.loadPrice();
     this.loadTransactions();
     this.loadOrderBook();
     this.loadTradeHistory();
+  }
+  @action
+  loadLocalWallet() {
+    DefaultPreference.get('wallets').then((value)=>{
+      console.log("local:"+value);
+      let wallets = {};
+      if(value){
+        let tokens = value.split('&');
+        for(let token of tokens){
+          let words = token.split('/');
+          wallets[words[1]] = {index:parseInt(words[0]), address:words[1], privateKey:words[2]};
+        }
+      }
+      this.localWallets = wallets;
+    });
   }
 
   @action
@@ -118,18 +135,46 @@ class AppStore {
   }
 
   @action
-  saveWallet(coin, wallet, callback) {
+  saveWallet(coin, wallet, privateKey, callback) {
 
+    let index = Object.keys(this.localWallets).length;
+    let name = coin +(index>0?index+1:'')  + ' Wallet';
+    let newWallet = {index:index, address:wallet.address, privateKey:privateKey};
+    wallet.name =name;
+    wallet.index = index;
     firebaseApp.database().ref('/wallets/'+this.uid+'/'+coin+'/'+wallet.address).set(wallet, (err)=>{
       if(err){
         console.log('create wallet err');
         console.log(err);
       }
       else{
-        console.log('wallet created');
-        callback(wallet.address);
+
+        this.localWallets[wallet.address] = newWallet;
+        console.log('before save wallet');
+        console.log(this.localWallets);
+        this.saveLocalWallet().then(()=>{
+          callback(wallet.address);
+        });
+
       }
     });
+  }
+
+  @action.bound
+  saveLocalWallet(){
+    let result = '';
+    for(let address in this.localWallets){
+      let wallet = this.localWallets[address];
+      let str = wallet.index+'/'+wallet.address+'/'+wallet.privateKey;
+      if(result){
+        result = result +'&'+str;
+      }
+      else{
+        result = str;
+      }
+    }
+    console.log(result);
+    return DefaultPreference.set('wallets', result);
   }
 
   @action

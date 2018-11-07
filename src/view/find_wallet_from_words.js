@@ -12,6 +12,7 @@ import Toast, {DURATION} from 'react-native-easy-toast'
 import { action } from 'mobx'
 import { observer, inject } from 'mobx-react/native'
 import DefaultPreference from "react-native-default-preference";
+import {NavigationActions, StackActions} from "react-navigation";
 
 const WORDS_LENGTH=12;
 
@@ -61,7 +62,8 @@ export default class FindWalletFromWords extends Component {
       if(ret === 0){
         address = result.data.address;
         privateKey = result.data.privateKey;
-        return DefaultPreference.set('privateKey', privateKey);
+        let newWallet = {address:address, mnemonic:mnemonic};
+        this.props.appStore.saveWallet(this.state.coin, newWallet, privateKey, this.walletCreated);
       }
       else if(ret === 1){
         throw 'Wrong secret words';
@@ -69,10 +71,6 @@ export default class FindWalletFromWords extends Component {
       else if(ret === 2){
         throw 'There is no wallet';
       }
-    }).then(()=>{
-      console.log('pk saved');
-      let newWallet = {address:address, mnemonic:mnemonic};
-      this.props.appStore.saveWallet(this.state.coin, newWallet, this.walletCrated);
     }).catch((err)=>{
       this.refs.toast.show(err, DURATION.LENGTH_SHORT);
       this.setState({isProcessing:false});
@@ -80,10 +78,20 @@ export default class FindWalletFromWords extends Component {
   }
 
   @action.bound
-  walletCrated(){
+  walletCreated(){
     console.log('wallet added!!!');
     this.setState({isProcessing:false});
-    this.props.navigation.navigate('CompleteWallet', {msg:'Wallet added!'});
+    if(Object.keys(this.props.appStore.localWallets).length > 1){
+      this.props.navigation.dispatch(StackActions.reset({
+        index: 0,
+        key: null,
+        actions: [NavigationActions.navigate({ routeName: 'MyHome' })]
+      }));
+    }
+    else{
+      this.props.navigation.navigate('CompleteWallet', {msg:'Wallet added!'});
+    }
+
   }
 
   render() {

@@ -17,15 +17,12 @@ export default class WithdrawalAddress extends Component {
     this.state = {
       isProcessing : false,
       value: '',
-      complete:false,
-      privateKey:''
+      complete:false
     };
   }
 
   componentDidMount(){
-    DefaultPreference.get('privateKey').then((value)=>{
-      this.setState({privateKey:value});
-    });
+
   }
 
   @action.bound
@@ -68,14 +65,15 @@ export default class WithdrawalAddress extends Component {
   }
 
   sendToken(){
-    if(this.state.complete && this.state.privateKey){
-      let token = this.props.navigation.getParam('token', {});
-      let amount = this.props.navigation.getParam('amount', '0');
-      let wallet = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet : {};
-      let params = {from:wallet.address, to:this.state.value, amount:amount, privateKey:this.state.privateKey, token:token.symbol};
+    let token = this.props.navigation.getParam('token', {});
+    let amount = this.props.navigation.getParam('amount', '0');
+    let localWallet = this.props.appStore ? this.props.appStore.localWallets[token.address] : {};
+    console.log(localWallet);
+    if(this.state.complete && localWallet.privateKey){
+      let params = {from:localWallet.address, to:this.state.value, amount:amount, privateKey:localWallet.privateKey, token:token.symbol};
       console.log(params);
       this.setState({isProcessing:true});
-      if(token.symbol === 'ETH'){
+      if(token.symbol === token.coin){
         this.props.appStore.sendTransaction(params, this.transactionAdded);
       }
       else{
