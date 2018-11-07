@@ -1,12 +1,12 @@
 import React, { Component } from 'react'
-import { AppState, View, Text, Image, TouchableOpacity} from 'react-native';
+import { AppState, View, Text, Image, FlatList, TouchableOpacity} from 'react-native';
 import DefaultPreference from 'react-native-default-preference';
 import axios from 'axios';
 import { observer, inject } from 'mobx-react/native'
 import { action } from 'mobx'
 import LinearGradient from 'react-native-linear-gradient';
 const timer = require('react-native-timer');
-
+var numeral = require('numeral');
 @inject("appStore") @observer
 export default class WalletScreen extends Component {
   constructor() {
@@ -55,17 +55,22 @@ export default class WalletScreen extends Component {
     this.props.appStore.requestPriceSync(this.state.coin);
   }
 
+  selectWallet(index){
+    this.setState({selected:index});
+  }
+
   render() {
     let price = (this.props.appStore && this.props.appStore.priceInit) ? this.props.appStore.price : {};
+    let wallet = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet[this.state.coin] : {};
     let localWallets = this.props.appStore ?this.props.appStore.localWallets : {};
     let tokens = [];
     console.log(localWallets);
     let currentAddress = '';
+    let wallets = [];
     for(let address in localWallets){
-      console.log(localWallets[address]);
+      wallets.push(localWallets[address]);
       if(localWallets[address].index === this.state.selected){
         currentAddress = address;
-        break;
       }
     }
     console.log(currentAddress);
@@ -76,13 +81,13 @@ export default class WalletScreen extends Component {
       if(wallet[this.state.coin]){
         currentWallet = wallet[this.state.coin][currentAddress];
 
-        tokens.push({name:currentWallet.balance.name, coin:this.state.coin, symbol:currentWallet.balance.symbol, index:0, amount:currentWallet.balance.value, value:currentWallet.balance.value*price[this.state.coin].price+' USD'});
+        tokens.push({name:currentWallet.balance.name, coin:this.state.coin, symbol:currentWallet.balance.symbol, index:0, amount:currentWallet.balance.value, value:numeral(currentWallet.balance.value*price[this.state.coin].price).format('0,0.00')+' USD'});
 
         if(currentWallet.token){
           Object.keys(currentWallet.token).forEach((symbol)=>{
             let token = currentWallet.token[symbol];
             let rate = price[this.state.coin][symbol].last * price[this.state.coin].price;
-            tokens.push({name:token.name, coin:this.state.coin, symbol:token.symbol, index:token.index, amount:token.value, value:token.value*rate+' USD'});
+            tokens.push({name:token.name, coin:this.state.coin, symbol:token.symbol, index:token.index, amount:token.value, value:numeral(token.value*rate).format('0,0.00')+' USD'});
           });
         }
 
@@ -92,8 +97,18 @@ export default class WalletScreen extends Component {
     tokens.sort((a, b)=>{return a.index - b.index});
     console.log(currentWallet);
     return (
-      <LinearGradient colors={['#5da7dc', '#306eb6']} style={{ flex:1, alignItems: 'center'}}>
-        <View style={{flex:1, marginTop:79, marginLeft:13, marginRight:13, marginBottom:18, flexDirection:'row', borderRadius:15, backgroundColor:'white'}}>
+      <LinearGradient colors={['#5da7dc', '#306eb6']} style={{ flex:1}}>
+        <View style={{height:28, marginTop:31}}>
+          <FlatList horizontal={true} data={wallets} style={{marginLeft:13, height:28, marginRight:13}} renderItem={({ item: rowData }) => {
+            let name = wallet[rowData.address] ? wallet[rowData.address].name : '';
+            return (<TouchableOpacity keyExtractor={(item, index) => index} onPress={()=>this.selectWallet(rowData.index)} style={{height:28,  marginRight:14, borderRadius:14, justifyContent:'center', backgroundColor:(this.state.selected===rowData.index)?'white':'rgba(255,255,255,0.2)'}}>
+              <Text style={{fontSize:14, marginLeft:14, marginRight:14, color:(this.state.selected===rowData.index)?'rgb(74,74,74)':'rgba(255,255,255,0.5)', fontWeight:'bold'}}>{name}</Text>
+            </TouchableOpacity>)
+          }} />
+        </View>
+
+
+        <View style={{flex:1, marginTop:20,  marginLeft:13, marginRight:13, marginBottom:18, flexDirection:'row', borderRadius:15, backgroundColor:'white'}}>
           <View style={{flex:1}}>
             <Text style={{marginLeft:21, marginTop:21, fontSize:26, color:'rgb(74,74,74)', fontWeight:'bold'}}>{currentWallet.balance?currentWallet.balance.name:this.state.coin} Wallet</Text>
             <View style={{marginTop:21, flexDirection:'row'}}>

@@ -59,7 +59,7 @@ export default class FindWalletFromPrivateKey extends Component {
     this.setState({isProcessing:true});
     let address = '';
     let privateKey = '';
-    instance.get('account/'+this.state.value).then( (result)=>{
+    instance.post('privateKey',{privateKey:this.state.value}).then( (result)=>{
       console.log(result);
       address = result.data.address.toLowerCase();
       privateKey = result.data.privateKey;
