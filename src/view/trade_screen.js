@@ -1,10 +1,11 @@
 import React, { Component } from 'react'
-import {View, Text, Image, TouchableOpacity, TextInput, AppState} from 'react-native';
+import {View, Text, Image, TouchableOpacity, TextInput, ListView, AppState} from 'react-native';
 import { observer, inject } from 'mobx-react/native'
 import { action } from 'mobx'
 import LinearGradient from 'react-native-linear-gradient';
 import DefaultPreference from "react-native-default-preference";
 var numeral = require('numeral');
+import Toast, {DURATION} from 'react-native-easy-toast'
 
 @inject("appStore") @observer
 export default class TradeScreen extends Component {
@@ -16,7 +17,6 @@ export default class TradeScreen extends Component {
       market: 'FANCO/ETH',
       pay:'ETH',
       token:'FANCO',
-      mode:'Buy',
       address:'',
       price:'',
       amount:'',
@@ -57,10 +57,6 @@ export default class TradeScreen extends Component {
 
   changeMarket(){
 
-  }
-
-  changeMode(mode){
-    this.setState({mode:mode,price:'', amount:''});
   }
 
   moveHistory(){
@@ -123,13 +119,7 @@ export default class TradeScreen extends Component {
 
   setMaxAmount(){
     let price = this.state.price ? this.state.price : this.getCurrentPrice();
-    let max = 0;
-    if(this.state.mode === 'Buy'){
-      max = this.getCoinAmount() / parseFloat(price);
-    }
-    else{
-      max = this.getTokenAmount();
-    }
+    let max = this.getTokenAmount();
 
     this.setState({amount:max+'', price:price+''});
   }
@@ -150,6 +140,40 @@ export default class TradeScreen extends Component {
     return 0;
   }
 
+  requestSell(){
+    const total = this.getAmount() * this.getPrice();
+    if(this.getAmount() < 1 || total < 0.05 ){
+      console.log('a');
+      this.refs.toast.show('please order over 0.05 ETH ', DURATION.LENGTH_SHORT);
+      return;
+    }
+    if(total > 10){
+      this.refs.toast.show('please order less 10 ETH ', DURATION.LENGTH_SHORT);
+      return;
+    }
+
+    let localWallets = this.props.appStore ?this.props.appStore.localWallets : {};
+    let selected = this.props.appStore ? this.props.appStore.selectedWallet : 0;
+    let currentWallet = null;
+    for( let address in localWallets ){
+      let wallet = localWallets[address];
+      if(wallet.index == selected){
+        currentWallet = wallet;
+        break;
+      }
+    }
+    if(currentWallet){
+      let order = {address:currentWallet.address, privateKey:currentWallet.privateKey, amount:this.getAmount(), price:this.getPrice()};
+      this.props.appStore.sellToken(order, this.orderAdded);
+    }
+
+
+  }
+
+  @action.bound
+  orderAdded(){
+
+  }
 
   requestSync(){
 
@@ -161,12 +185,11 @@ export default class TradeScreen extends Component {
     let diff = price[this.state.pay] ? price[this.state.pay][this.state.token].percentChange : 0;
     let orderBook = (this.props.appStore && this.props.appStore.orderBookInit) ? this.props.appStore.orderBook : {};
     let asks = [];
-    let bids = [];
-
     let askMax = 0;
-    if(orderBook[this.state.pay] && orderBook[this.state.pay][this.state.token] && orderBook[this.state.pay][this.state.token].asks){
-      for(let ask in orderBook[this.state.pay][this.state.token].asks){
-        let order = orderBook[this.state.pay][this.state.token].asks[ask];
+    if(orderBook[this.state.pay] && orderBook[this.state.pay][this.state.token] && orderBook[this.state.pay][this.state.token].history ){
+      for(let hash in orderBook[this.state.pay][this.state.token].history){
+        let order = orderBook[this.state.pay][this.state.token].history[hash];
+        console.log(order);
         if(order.price < (1/Math.pow(10,5))){
           order.priceFormated = numeral(order.price).format('0.00000e+0');
         }
@@ -174,11 +197,18 @@ export default class TradeScreen extends Component {
           order.priceFormated = numeral(order.price).format('0,0.000000');
         }
 
-        if(order.total > (Math.pow(10,5))){
-          order.amountFormmated = numeral(order.total).format('0.00000e+0');
+        if(order.amount > (Math.pow(10,5))){
+          order.amountFormmated = numeral(order.amount).format('0.00000e+0');
         }
         else{
-          order.amountFormmated = numeral(order.total).format('0,0.0');
+          order.amountFormmated = numeral(order.amount).format('0,0.0');
+        }
+
+        if(order.total > (Math.pow(10,5))){
+          order.totalFormmated = numeral(order.total).format('0.00000e+0');
+        }
+        else{
+          order.totalFormmated = numeral(order.total).format('0,0.00');
         }
 
         if(askMax < parseFloat(order.amount)){
@@ -190,33 +220,14 @@ export default class TradeScreen extends Component {
       }
     }
 
-    let bidMax = 0;
-    if(orderBook[this.state.pay] && orderBook[this.state.pay][this.state.token] && orderBook[this.state.pay][this.state.token].bids){
-      for(let bid in orderBook[this.state.pay][this.state.token].bids){
-        let order = orderBook[this.state.pay][this.state.token].bids[bid];
-        if(order.price < (1/Math.pow(10,5))){
-          order.priceFormated = numeral(order.price).format('0.00000e+0');
-        }
-        else{
-          order.priceFormated = numeral(order.price).format('0,0.000000');
-        }
 
-        if(order.total > (Math.pow(10,5))){
-          order.amountFormmated = numeral(order.total).format('0.00000e+0');
-        }
-        else{
-          order.amountFormmated = numeral(order.total).format('0,0.0');
-        }
-        if(bidMax < parseFloat(order.amount)){
-          bidMax = parseFloat(order.amount);
-        }
-        bids.push(order);
-      }
+    if(asks.length>0){
+      asks.sort((a,b)=>{return parseFloat(b.total) - parseFloat(a.total)});
     }
 
+    const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1.orderHash !== r2.orderHash});
+    let dataSource = ds.cloneWithRows(asks);
 
-    asks.sort((a,b)=>{return parseFloat(a.price) - parseFloat(b.price)});
-    bids.sort((a,b)=>{return parseFloat(b.price) - parseFloat(a.price)});
 
     return (
       <LinearGradient colors={['#5da7dc', '#306eb6']} style={{ flex:1, alignItems: 'center'}}>
@@ -235,23 +246,14 @@ export default class TradeScreen extends Component {
         </View>
         <View style={{marginTop:25, marginLeft:13, marginRight:13, flexDirection:'row', borderRadius:15, backgroundColor:'white'}}>
           <View style={{flex:1, alignItems:'center'}}>
-            <View style={{flexDirection:'row', marginTop:16, alignItems:'center'}}>
-              <Text style={{flex:1, textAlign:'center', fontSize:18, color:(this.state.mode==='Buy'?'rgb(51,77,172)':'rgb(206,206,206)')}} onPress={()=>this.changeMode('Buy')}>
-                Buy
-              </Text>
-              <View style={{width:1, height:20, backgroundColor:'rgb(125,125,125)'}}/>
 
-              <Text style={{fontSize:18, textAlign:'center', flex:1, color:(this.state.mode==='Sell'?'rgb(51,77,172)':'rgb(206,206,206)')}} onPress={()=>this.changeMode('Sell')}>
-                Sell
-              </Text>
-            </View>
             <Text style={{marginTop:20, fontSize:14, color:'rgb(95,173,4)'}}>
               {this.getCurrentPrice()} / {numeral(diff).format('0,0.000')}%
             </Text>
             <View style={{flexDirection:'row', alignItems:'flex-end'}}>
               <Text style={{fontSize:16, color:'rgb(155,155,155)'}}>Assets</Text>
-              <Text style={{fontSize:24, marginLeft:8, marginRight:8, fontWeight:'bold', color:'rgb(4,4,4)'}}>{numeral(this.state.mode==='Buy'?this.getCoinAmount():this.getTokenAmount()).format('0,0.0000')}</Text>
-              <Text style={{fontSize:16, color:'rgb(155,155,155)'}}>{(this.state.mode==='Buy'?this.state.pay:this.state.token)}</Text>
+              <Text style={{fontSize:24, marginLeft:8, marginRight:8, fontWeight:'bold', color:'rgb(4,4,4)'}}>{numeral(this.getTokenAmount()).format('0,0.0000')}</Text>
+              <Text style={{fontSize:16, color:'rgb(155,155,155)'}}>{this.state.token}</Text>
             </View>
 
             <View style={{marginTop:27, flexDirection:'row', alignItems:'center'}}>
@@ -290,52 +292,42 @@ export default class TradeScreen extends Component {
               Total {this.getAmount()*this.getPrice()} {this.state.pay}
             </Text>
 
-            <TouchableOpacity style={{width:200, marginTop:8, marginBottom:17, justifyContent:'center', alignItems:'center', borderRadius:24, height:40, backgroundColor:(this.state.mode==='Buy'?'rgb(95,173,4)':'rgb(182,0,100)')}}>
+            <TouchableOpacity onPress={()=>this.requestSell()} style={{width:200, marginTop:8, marginBottom:17, justifyContent:'center', alignItems:'center', borderRadius:24, height:40, backgroundColor:'rgb(182,0,100)'}}>
               <Text style={{fontSize:18, color:'white', fontWeight:'bold'}}>
-                {this.state.mode}
+                Sell
               </Text>
             </TouchableOpacity>
           </View>
         </View>
-        <View style={{flex:1}}>
 
-        </View>
-        <View style={{backgroundColor:'white', height:152, flexDirection:'row'}}>
-          <View style={{flex:1}}>
-            {asks.map((ask, index)=>{
-              let barSize = (parseFloat(ask.amount) / askMax) - 0.1;
-              let barWidth = numeral(barSize).format('0%');
-              return <View key={index} style={{flexDirection:'row', height:38, alignItems:'center'}}>
-                <View style={{backgroundColor:'rgba(182,0,100,0.1)', height:38, width:barWidth, position:'absolute', top:0, right:0}} />
-                <Text style={{flex:1, marginLeft:20, fontWeight:'bold', fontSize:14, color:'rgb(208,2,27)'}}>
-                  {ask.priceFormated}
-                </Text>
-                <Text style={{marginRight:12}}>
-                  {ask.amountFormmated}
-                </Text>
+        <Toast style={{marginBottom:60}} ref="toast"/>
 
-              </View>
-            })}
+        <View style={{backgroundColor:'white', flex:1, marginTop:50, flexDirection:'row'}}>
+          <ListView style={{flex:1}} dataSource={dataSource}
+                    renderRow={(rowData) =>{
+                      let barSize = (parseFloat(rowData.amount) / askMax) - 0.1;
+                      let barWidth = numeral(barSize).format('0%');
+                      return <View style={{flexDirection:'row', height:38, alignItems:'center'}}>
+                        <View style={{backgroundColor:'rgba(182,0,100,0.1)', height:38, width:barWidth, position:'absolute', top:0, right:0}} />
+                        <Text style={{flex:1, marginLeft:20, fontWeight:'bold', fontSize:14, color:'rgb(208,2,27)'}}>
+                          {rowData.priceFormated}
+                        </Text>
+                        <Text style={{marginRight:30}}>
+                          {rowData.amountFormmated} {this.state.token}
+                        </Text>
 
+                        <Text style={{marginRight:12}}>
+                          {rowData.totalFormmated} {this.state.pay}
+                        </Text>
 
-          </View>
-          <View style={{flex:1}}>
-            {bids.map((bid, index)=>{
-              let barSize = (parseFloat(bid.amount) / bidMax) - 0.1;
-              let barWidth = numeral(barSize).format('0%');
-              return <View key={index} style={{flexDirection:'row', height:38, alignItems:'center'}}>
-                <View style={{backgroundColor:'rgba(95,173,4, 0.1)', height:38, width:barWidth, position:'absolute', top:0, left:0}} />
-                <Text style={{flex:1, marginLeft:20, fontSize:14, fontWeight:'bold', color:'rgb(95,173,4)'}}>
-                  {bid.priceFormated}
-                </Text>
-                <Text style={{marginRight:12}}>
-                  {bid.amountFormmated}
-                </Text>
-              </View>
-            })}
-
-          </View>
-
+                        <TouchableOpacity style={{width:40, height:24, marginRight:12, justifyContent:'center', alignItems:'center', borderRadius:24,  backgroundColor:'rgb(95,173,4)'}}>
+                          <Text style={{fontSize:14, color:'white', fontWeight:'bold'}}>
+                            Buy
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    }}
+          />
 
         </View>
       </LinearGradient>

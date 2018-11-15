@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { AppState, View, Text, Image, FlatList, TouchableOpacity} from 'react-native';
-import DefaultPreference from 'react-native-default-preference';
 import axios from 'axios';
 import { observer, inject } from 'mobx-react/native'
 import { action } from 'mobx'
@@ -15,7 +14,6 @@ export default class WalletScreen extends Component {
       isProcessing : false,
       privateKey:'',
       coin: 'ETH',
-      selected:0,
       appState: AppState.currentState
     };
   }
@@ -56,20 +54,24 @@ export default class WalletScreen extends Component {
   }
 
   selectWallet(index){
-    this.setState({selected:index});
+    this.props.appStore.selectWallet(index);
   }
+
+
 
   render() {
     let price = (this.props.appStore && this.props.appStore.priceInit) ? this.props.appStore.price : {};
     let wallet = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet[this.state.coin] : {};
     let localWallets = this.props.appStore ?this.props.appStore.localWallets : {};
+    let selected = this.props.appStore ? this.props.appStore.selectedWallet : 0;
+    console.log('selectaed:'+selected);
     let tokens = [];
     console.log(localWallets);
     let currentAddress = '';
     let wallets = [];
     for(let address in localWallets){
       wallets.push(localWallets[address]);
-      if(localWallets[address].index === this.state.selected){
+      if(localWallets[address].index === selected){
         currentAddress = address;
       }
     }
@@ -101,8 +103,8 @@ export default class WalletScreen extends Component {
         <View style={{height:28, marginTop:31}}>
           <FlatList horizontal={true} data={wallets} style={{marginLeft:13, height:28, marginRight:13}} renderItem={({ item: rowData }) => {
             let name = wallet[rowData.address] ? wallet[rowData.address].name : '';
-            return (<TouchableOpacity keyExtractor={(item, index) => index} onPress={()=>this.selectWallet(rowData.index)} style={{height:28,  marginRight:14, borderRadius:14, justifyContent:'center', backgroundColor:(this.state.selected===rowData.index)?'white':'rgba(255,255,255,0.2)'}}>
-              <Text style={{fontSize:14, marginLeft:14, marginRight:14, color:(this.state.selected===rowData.index)?'rgb(74,74,74)':'rgba(255,255,255,0.5)', fontWeight:'bold'}}>{name}</Text>
+            return (<TouchableOpacity keyExtractor={(item, index) => index} onPress={()=>this.selectWallet(rowData.index)} style={{height:28,  marginRight:14, borderRadius:14, justifyContent:'center', backgroundColor:(selected===rowData.index)?'white':'rgba(255,255,255,0.2)'}}>
+              <Text style={{fontSize:14, marginLeft:14, marginRight:14, color:(selected===rowData.index)?'rgb(74,74,74)':'rgba(255,255,255,0.5)', fontWeight:'bold'}}>{name}</Text>
             </TouchableOpacity>)
           }} />
         </View>

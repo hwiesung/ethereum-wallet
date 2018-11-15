@@ -6,7 +6,7 @@ import DefaultPreference from 'react-native-default-preference';
 
 const instance = axios.create({
   baseURL: 'https://us-central1-sonder-6287a.cloudfunctions.net/',
-  timeout: 30000,
+  timeout: 60000,
   headers: {'Content-Type':'application/json'}
 });
 
@@ -16,7 +16,8 @@ class AppStore {
   @observable username = null;
   @observable wallet = null;
   @observable price = null;
-
+  @observable selectedWallet = null;
+  @observable orderBook = null;
 
   init(user){
     this.uid = user;
@@ -33,6 +34,7 @@ class AppStore {
     this.transactionInit = false;
     this.orderBookInit = false;
     this.tradeHistoryInit = false;
+    this.selectedWallet = 0;
     console.log('init User:'+this.uid);
     this.loadData()
   }
@@ -63,6 +65,13 @@ class AppStore {
       this.localWallets = wallets;
     });
   }
+
+  @action
+  selectWallet(index, callback) {
+    this.selectedWallet  = index;
+
+  }
+
 
   @action
   loadUserInfo() {
@@ -280,7 +289,7 @@ class AppStore {
     }
     else{
       console.log('watch orderbook');
-      firebaseApp.database().ref('/order_book').on('value', (snap)=>{this.onLoadOrderBookComplete(snap)});
+      firebaseApp.database().ref('/orders').on('value', (snap)=>{this.onLoadOrderBookComplete(snap)});
     }
   }
 
@@ -313,6 +322,15 @@ class AppStore {
     });
   }
 
+  @action
+  sellToken(params, callback) {
+    params.uid = this.uid;
+    console.log(params);
+    instance.post('sell_token', params).then( (result)=> {
+      console.log(result.data);
+      callback();
+    });
+  }
 
 }
 
