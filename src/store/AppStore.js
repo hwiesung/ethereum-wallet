@@ -6,7 +6,7 @@ import DefaultPreference from 'react-native-default-preference';
 
 const instance = axios.create({
   baseURL: 'https://us-central1-sonder-6287a.cloudfunctions.net/',
-  timeout: 60000,
+  timeout: 180000,
   headers: {'Content-Type':'application/json'}
 });
 
@@ -27,12 +27,12 @@ class AppStore {
     this.price = null;
     this.transactions = null;
     this.tradeHistory = null;
-    this.orderBook = null;
+    this.orderBook = {};
     this.userInit= false;
     this.priceInit = false;
     this.walletInit = false;
     this.transactionInit = false;
-    this.orderBookInit = false;
+    this.orderBookInit = {};
     this.tradeHistoryInit = false;
     this.selectedWallet = 0;
     console.log('init User:'+this.uid);
@@ -284,20 +284,23 @@ class AppStore {
 
   @action
   loadOrderBook() {
-    if(this.orderBookInit){
+    if(Object.keys(this.orderBookInit).length> 0){
       console.log('already orderBook is loaded!');
     }
     else{
-      console.log('watch orderbook');
-      firebaseApp.database().ref('/orders').on('value', (snap)=>{this.onLoadOrderBookComplete(snap)});
+      console.log('watch orderbook')
+      let now = moment().utc().valueOf();
+      //call each market
+      firebaseApp.database().ref('/orders/ETH/FANCO/history').on('value', (snap)=>{this.onLoadOrderBookComplete(snap, 'FANCO/ETH')});
     }
   }
 
   @action.bound
-  onLoadOrderBookComplete(snapshot) {
+  onLoadOrderBookComplete(snapshot, market) {
     if (snapshot.val()) {
-      this.orderBook = snapshot.val();
-      this.orderBookInit = true;
+      console.log('orderbook loaded:'+market);
+      this.orderBook[market] = snapshot.val();
+      this.orderBookInit[market] = true;
     }
     else {
       console.log('there is no orderBook');
@@ -327,8 +330,15 @@ class AppStore {
     params.uid = this.uid;
     console.log(params);
     instance.post('sell_token', params).then( (result)=> {
-      console.log(result.data);
-      callback();
+      if(result.status === 200 && result.data.ret_code === 0){
+        callback(true);
+      }
+      else{
+        callback(false);
+      }
+
+    }).catch((err)=>{
+      callback(false);
     });
   }
 

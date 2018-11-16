@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import {View, Text, Image, TouchableOpacity, TextInput, ListView, AppState} from 'react-native';
+import {View, Text, Image, TouchableOpacity, ActivityIndicator, TextInput, ListView, AppState} from 'react-native';
 import { observer, inject } from 'mobx-react/native'
 import { action } from 'mobx'
 import LinearGradient from 'react-native-linear-gradient';
@@ -163,15 +163,24 @@ export default class TradeScreen extends Component {
       }
     }
     if(currentWallet){
-      let order = {address:currentWallet.address, privateKey:currentWallet.privateKey, amount:this.getAmount(), price:this.getPrice()};
+      let order = {address:currentWallet.address, privateKey:currentWallet.privateKey, token:this.state.token, amount:this.getAmount()+'', price:this.getPrice()+''};
       this.props.appStore.sellToken(order, this.orderAdded);
+      this.setState({isProcessing:true});
     }
 
 
   }
 
   @action.bound
-  orderAdded(){
+  orderAdded(success){
+    if(success){
+      this.setState({price:'', amount:''});
+      this.refs.toast.show('Success', DURATION.LENGTH_SHORT);
+    }
+    else{
+      this.refs.toast.show('Request is failed. plase try again.', DURATION.LENGTH_SHORT);
+    }
+    this.setState({isProcessing:false});
 
   }
 
@@ -183,13 +192,12 @@ export default class TradeScreen extends Component {
   render() {
     let price = (this.props.appStore && this.props.appStore.priceInit) ? this.props.appStore.price : {};
     let diff = price[this.state.pay] ? price[this.state.pay][this.state.token].percentChange : 0;
-    let orderBook = (this.props.appStore && this.props.appStore.orderBookInit) ? this.props.appStore.orderBook : {};
+    let orderBook = (this.props.appStore && this.props.appStore.orderBookInit[this.state.market]) ? this.props.appStore.orderBook[this.state.market] : null;
     let asks = [];
     let askMax = 0;
-    if(orderBook[this.state.pay] && orderBook[this.state.pay][this.state.token] && orderBook[this.state.pay][this.state.token].history ){
-      for(let hash in orderBook[this.state.pay][this.state.token].history){
-        let order = orderBook[this.state.pay][this.state.token].history[hash];
-        console.log(order);
+    if(orderBook){
+      for(let hash in orderBook){
+        let order = orderBook[hash];
         if(order.price < (1/Math.pow(10,5))){
           order.priceFormated = numeral(order.price).format('0.00000e+0');
         }
@@ -213,12 +221,13 @@ export default class TradeScreen extends Component {
 
         if(askMax < parseFloat(order.amount)){
           askMax = parseFloat(order.amount);
-          console.log(askMax);
         }
 
         asks.push(order);
       }
     }
+
+    console.log(asks.length);
 
 
     if(asks.length>0){
@@ -292,11 +301,11 @@ export default class TradeScreen extends Component {
               Total {this.getAmount()*this.getPrice()} {this.state.pay}
             </Text>
 
-            <TouchableOpacity onPress={()=>this.requestSell()} style={{width:200, marginTop:8, marginBottom:17, justifyContent:'center', alignItems:'center', borderRadius:24, height:40, backgroundColor:'rgb(182,0,100)'}}>
+            {!this.state.isProcessing?(<TouchableOpacity onPress={()=>this.requestSell()} style={{width:200, marginTop:8, marginBottom:17, justifyContent:'center', alignItems:'center', borderRadius:24, height:40, backgroundColor:'rgb(182,0,100)'}}>
               <Text style={{fontSize:18, color:'white', fontWeight:'bold'}}>
                 Sell
               </Text>
-            </TouchableOpacity>
+            </TouchableOpacity>):(<ActivityIndicator style={{marginTop:8, marginBottom:17,}}/>)}
           </View>
         </View>
 
