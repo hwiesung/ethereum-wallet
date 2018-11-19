@@ -6,13 +6,13 @@ import LinearGradient from 'react-native-linear-gradient';
 import DefaultPreference from "react-native-default-preference";
 var numeral = require('numeral');
 import Toast, {DURATION} from 'react-native-easy-toast'
+const timer = require('react-native-timer');
 
 @inject("appStore") @observer
 export default class TradeScreen extends Component {
   constructor() {
     super();
     this.state = {
-      isProcessing: false,
       privateKey: '',
       market: 'FANCO/ETH',
       pay:'ETH',
@@ -20,6 +20,7 @@ export default class TradeScreen extends Component {
       address:'',
       price:'',
       amount:'',
+      isProcessing:{},
       appState: AppState.currentState
     };
   }
@@ -38,7 +39,10 @@ export default class TradeScreen extends Component {
     this._navListener = this.props.navigation.addListener('willFocus', (route) => {
       this.requestSync();
     });
+
+    this.props.appStore.loadOrderBook(this.state.pay, this.state.token);
   }
+
 
   componentWillUnmount(){
     AppState.removeEventListener('change', this.handleAppStateChange);
@@ -140,6 +144,20 @@ export default class TradeScreen extends Component {
     return 0;
   }
 
+  getCurrentWallet(){
+    let localWallets = this.props.appStore ?this.props.appStore.localWallets : {};
+    let selected = this.props.appStore ? this.props.appStore.selectedWallet : 0;
+    let currentWallet = null;
+    for( let address in localWallets ){
+      let wallet = localWallets[address];
+      if(wallet.index == selected){
+        currentWallet = wallet;
+        break;
+      }
+    }
+    return currentWallet;
+  }
+
   requestSell(){
     const total = this.getAmount() * this.getPrice();
     if(this.getAmount() < 1 || total < 0.05 ){
@@ -152,22 +170,38 @@ export default class TradeScreen extends Component {
       return;
     }
 
-    let localWallets = this.props.appStore ?this.props.appStore.localWallets : {};
-    let selected = this.props.appStore ? this.props.appStore.selectedWallet : 0;
-    let currentWallet = null;
-    for( let address in localWallets ){
-      let wallet = localWallets[address];
-      if(wallet.index == selected){
-        currentWallet = wallet;
-        break;
-      }
-    }
+
+    let currentWallet = this.getCurrentWallet();
+
     if(currentWallet){
       let order = {address:currentWallet.address, privateKey:currentWallet.privateKey, token:this.state.token, amount:this.getAmount()+'', price:this.getPrice()+''};
       this.props.appStore.sellToken(order, this.orderAdded);
-      this.setState({isProcessing:true});
+
+      let processing = {};
+      Object.assign(processing,this.state.isProcessing);
+      processing['sell'] = true;
+      this.setState({isProcessing:processing});
+    }
+  }
+
+  requestBuy(item){
+    if(this.getCoinAmount() <= item.total){
+      this.refs.toast.show('Not enough ETH', DURATION.LENGTH_SHORT);
+      return;
     }
 
+    let currentWallet = this.getCurrentWallet();
+
+    if(currentWallet){
+      let order = {address:currentWallet.address, privateKey:currentWallet.privateKey, token:this.state.token, seller:item.seller, orderHash:item.orderHash, amount:item.amount+'', price:item.price+'', nonce:item.nonce+'', expire:item.expire+'', total:item.total+''};
+      this.props.appStore.buyToken(order, this.tokenBought);
+
+      let processing = {};
+      Object.assign(processing,this.state.isProcessing);
+      processing[item.orderHash] = true;
+      this.setState({isProcessing:processing});
+
+    }
 
   }
 
@@ -178,10 +212,29 @@ export default class TradeScreen extends Component {
       this.refs.toast.show('Success', DURATION.LENGTH_SHORT);
     }
     else{
-      this.refs.toast.show('Request is failed. plase try again.', DURATION.LENGTH_SHORT);
+      this.refs.toast.show('Request is failed. please try again.', DURATION.LENGTH_SHORT);
     }
-    this.setState({isProcessing:false});
+    let processing = {};
+    Object.assign(processing,this.state.isProcessing);
+    processing['sell'] = false;
+    this.setState({isProcessing:processing});
 
+  }
+
+  @action.bound
+  tokenBought(orderHash, success){
+    console.log(orderHash+','+success);
+    if(success){
+      this.refs.toast.show('Success', DURATION.LENGTH_SHORT);
+    }
+    else{
+      this.refs.toast.show('Request is failed. please try again.', DURATION.LENGTH_SHORT);
+    }
+
+    let processing = {};
+    Object.assign(processing, this.state.isProcessing);
+    processing[orderHash] = false;
+    this.setState({isProcessing:processing});
   }
 
   requestSync(){
@@ -192,9 +245,10 @@ export default class TradeScreen extends Component {
   render() {
     let price = (this.props.appStore && this.props.appStore.priceInit) ? this.props.appStore.price : {};
     let diff = price[this.state.pay] ? price[this.state.pay][this.state.token].percentChange : 0;
-    let orderBook = (this.props.appStore && this.props.appStore.orderBookInit[this.state.market]) ? this.props.appStore.orderBook[this.state.market] : null;
+    let orderBook = (this.props.appStore && this.props.appStore.orderBookInit) ? this.props.appStore.orderBook : null;
     let asks = [];
     let askMax = 0;
+    console.log(orderBook);
     if(orderBook){
       for(let hash in orderBook){
         let order = orderBook[hash];
@@ -226,9 +280,6 @@ export default class TradeScreen extends Component {
         asks.push(order);
       }
     }
-
-    console.log(asks.length);
-
 
     if(asks.length>0){
       asks.sort((a,b)=>{return parseFloat(b.total) - parseFloat(a.total)});
@@ -301,7 +352,7 @@ export default class TradeScreen extends Component {
               Total {this.getAmount()*this.getPrice()} {this.state.pay}
             </Text>
 
-            {!this.state.isProcessing?(<TouchableOpacity onPress={()=>this.requestSell()} style={{width:200, marginTop:8, marginBottom:17, justifyContent:'center', alignItems:'center', borderRadius:24, height:40, backgroundColor:'rgb(182,0,100)'}}>
+            {!this.state.isProcessing['sell']?(<TouchableOpacity onPress={()=>this.requestSell()} style={{width:200, marginTop:8, marginBottom:17, justifyContent:'center', alignItems:'center', borderRadius:24, height:40, backgroundColor:'rgb(182,0,100)'}}>
               <Text style={{fontSize:18, color:'white', fontWeight:'bold'}}>
                 Sell
               </Text>
@@ -312,6 +363,7 @@ export default class TradeScreen extends Component {
         <Toast style={{marginBottom:60}} ref="toast"/>
 
         <View style={{backgroundColor:'white', flex:1, marginTop:50, flexDirection:'row'}}>
+          {asks.length>0?(
           <ListView style={{flex:1}} dataSource={dataSource}
                     renderRow={(rowData) =>{
                       let barSize = (parseFloat(rowData.amount) / askMax) - 0.1;
@@ -329,14 +381,14 @@ export default class TradeScreen extends Component {
                           {rowData.totalFormmated} {this.state.pay}
                         </Text>
 
-                        <TouchableOpacity style={{width:40, height:24, marginRight:12, justifyContent:'center', alignItems:'center', borderRadius:24,  backgroundColor:'rgb(95,173,4)'}}>
+                          {!this.state.isProcessing[rowData.orderHash]?(<TouchableOpacity onPress={()=>this.requestBuy(rowData)} style={{width:40, height:24, marginRight:12, justifyContent:'center', alignItems:'center', borderRadius:24,  backgroundColor:'rgb(95,173,4)'}}>
                           <Text style={{fontSize:14, color:'white', fontWeight:'bold'}}>
                             Buy
                           </Text>
-                        </TouchableOpacity>
+                        </TouchableOpacity>):(<ActivityIndicator style={{width:40, marginRight:12}}/>)}
                       </View>
                     }}
-          />
+          />):null}
 
         </View>
       </LinearGradient>

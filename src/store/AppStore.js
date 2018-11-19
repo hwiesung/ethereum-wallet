@@ -18,7 +18,7 @@ class AppStore {
   @observable price = null;
   @observable selectedWallet = null;
   @observable orderBook = null;
-
+  @observable orderBookInit = null;
   init(user){
     this.uid = user;
     this.user = null;
@@ -27,12 +27,12 @@ class AppStore {
     this.price = null;
     this.transactions = null;
     this.tradeHistory = null;
-    this.orderBook = {};
+    this.orderBook = null;
     this.userInit= false;
     this.priceInit = false;
     this.walletInit = false;
     this.transactionInit = false;
-    this.orderBookInit = {};
+    this.orderBookInit = null;
     this.tradeHistoryInit = false;
     this.selectedWallet = 0;
     console.log('init User:'+this.uid);
@@ -47,7 +47,6 @@ class AppStore {
     this.loadWallet();
     this.loadPrice();
     this.loadTransactions();
-    this.loadOrderBook();
     this.loadTradeHistory();
   }
   @action
@@ -283,24 +282,21 @@ class AppStore {
   }
 
   @action
-  loadOrderBook() {
-    if(Object.keys(this.orderBookInit).length> 0){
-      console.log('already orderBook is loaded!');
+  loadOrderBook(coin, token) {
+    if(this.orderBookInit) {
+      let items = this.orderBookInit.split('/');
+      firebaseApp.database().ref('/order_book/'+items[1]+'/'+items[0]).off();
     }
-    else{
-      console.log('watch orderbook')
-      let now = moment().utc().valueOf();
-      //call each market
-      firebaseApp.database().ref('/orders/ETH/FANCO/history').on('value', (snap)=>{this.onLoadOrderBookComplete(snap, 'FANCO/ETH')});
-    }
+
+    firebaseApp.database().ref('/order_book/'+coin+'/'+token).on('value', (snap)=>{this.onLoadOrderBookComplete(snap, token+'/'+coin)});
   }
 
   @action.bound
   onLoadOrderBookComplete(snapshot, market) {
     if (snapshot.val()) {
       console.log('orderbook loaded:'+market);
-      this.orderBook[market] = snapshot.val();
-      this.orderBookInit[market] = true;
+      this.orderBook = snapshot.val();
+      this.orderBookInit = market;
     }
     else {
       console.log('there is no orderBook');
@@ -339,6 +335,24 @@ class AppStore {
 
     }).catch((err)=>{
       callback(false);
+    });
+  }
+
+  @action
+  buyToken(params, callback) {
+    params.uid = this.uid;
+    console.log('request);')
+    instance.post('buy_token', params).then( (result)=> {
+      console.log(result);
+      if(result.status === 200 && result.data.ret_code === 0){
+        callback(params.orderHash, true);
+      }
+      else{
+        callback(params.orderHash, false);
+      }
+
+    }).catch((err)=>{
+      callback(params.orderHash, false);
     });
   }
 
