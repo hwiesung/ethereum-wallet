@@ -15,6 +15,7 @@ class AppStore {
   @observable user = null;
   @observable username = null;
   @observable wallet = null;
+  @observable walletInit = false;
   @observable price = null;
   @observable selectedWallet = null;
   @observable orderBook = null;
@@ -26,14 +27,12 @@ class AppStore {
     this.localWallets = {};
     this.price = null;
     this.transactions = null;
-    this.tradeHistory = null;
     this.orderBook = null;
     this.userInit= false;
     this.priceInit = false;
     this.walletInit = false;
     this.transactionInit = false;
     this.orderBookInit = null;
-    this.tradeHistoryInit = false;
     this.selectedWallet = 0;
     console.log('init User:'+this.uid);
     this.loadData()
@@ -47,7 +46,6 @@ class AppStore {
     this.loadWallet();
     this.loadPrice();
     this.loadTransactions();
-    this.loadTradeHistory();
   }
   @action
   loadLocalWallet() {
@@ -186,9 +184,29 @@ class AppStore {
   }
 
   @action
+  requestOrderBookSync() {
+    let before1min = moment().subtract(1, 'minute').utc().valueOf();
+    if(this.orderBookInit) {
+      let items = this.orderBookInit.split('/');
+      const coin = items[1];
+      const token = items[0];
+      firebaseApp.database().ref('/orders/'+coin+'/'+token).once('value').then((snap)=>{
+        let orders = snap.val();
+        console.log(orders);
+        if(orders && orders.update_time < before1min){
+          console.log('request orders sync:'+orders.update_time);
+          firebaseApp.database().ref('/sync/'+this.uid+'/'+coin+'/0x0/orders/'+token).set(orders.lastBlockNumber);
+        }
+      });
+    }
+
+  }
+
+
+  @action
   requestBalanceSync(coin, address) {
     let before1min = moment().subtract(1, 'minute').utc().valueOf();
-    if(this.wallet.update_time < before1min){
+    if(this.wallet[coin][address].balance.update_time < before1min){
       firebaseApp.database().ref('/sync/'+this.uid+'/'+coin+'/'+address+'/balance').set(true);
     }
   }
@@ -198,16 +216,6 @@ class AppStore {
     let before1min = moment().subtract(1, 'minute').utc().valueOf();
     if(this.price[coin].update_time < before1min){
       firebaseApp.database().ref('/sync/'+this.uid+ '/'+coin+'/price').set(true);
-    }
-  }
-
-  @action
-  requestTradeHistorySync(coin, token, address) {
-    let before1min = moment().subtract(1, 'minute').utc().valueOf();
-    let lastUpdate = (this.tradeHistory && this.tradeHistory[coin] && this.tradeHistory[coin][token])? this.tradeHistory[coin][token].update_time : 0;
-    let start = (this.tradeHistory && this.tradeHistory[coin] && this.tradeHistory[coin][token])? this.tradeHistory[coin][token].start : 0;
-    if(lastUpdate< before1min){
-      firebaseApp.database().ref('/sync/'+this.uid+ '/'+coin+'/'+address+'/'+token+'/trade_history').set(start);
     }
   }
 
@@ -258,29 +266,6 @@ class AppStore {
     }
   }
 
-
-  @action
-  loadTradeHistory() {
-    if(this.tradeHistoryInit){
-      console.log('already trade history is loaded!');
-    }
-    else{
-      firebaseApp.database().ref('/trade_history/'+this.uid).on('value', (snap)=>{this.onLoadTradeHistoryComplete(snap)});
-    }
-  }
-
-  @action.bound
-  onLoadTradeHistoryComplete(snapshot) {
-    if (snapshot.val()) {
-      console.log('trade updated');
-      this.tradeHistory = snapshot.val();
-      this.tradeHistoryInit = true;
-    }
-    else {
-      console.log('there is no history');
-    }
-  }
-
   @action
   loadOrderBook(coin, token) {
     if(this.orderBookInit) {
@@ -322,6 +307,33 @@ class AppStore {
   }
 
   @action
+  obtainTradeHistory(coin, token, address, callback) {  // 0:incomplete, 1:complete
+    let list = [];
+    let actions = [];
+    actions.push(firebaseApp.database().ref('/orders/'+coin+'/'+token+'/history').orderByChild('seller').equalTo(address).once('value'));
+    actions.push(firebaseApp.database().ref('/orders/'+coin+'/'+token+'/history').orderByChild('buyer').equalTo(address).once('value'));
+    return Promise.all(actions).then((results)=>{
+      let result = results[0].val();
+      if(result){
+        for(let hash in result){
+          list.push(result[hash]);
+        }
+      }
+
+      result = results[1].val();
+      if(result){
+        for(let hash in result){
+          result[hash].isBoaught = true;
+          list.push(result[hash]);
+        }
+      }
+
+      callback(list);
+    });
+
+  }
+
+  @action
   sellToken(params, callback) {
     params.uid = this.uid;
     console.log(params);
@@ -352,6 +364,24 @@ class AppStore {
       }
 
     }).catch((err)=>{
+      callback(params.orderHash, false);
+    });
+  }
+
+  @action
+  cancelOrder(params, callback) {
+    params.uid = this.uid;
+    console.log(params);
+    instance.post('cancel_order', params).then( (result)=> {
+      if(result.status === 200 && result.data.ret_code === 0){
+        callback(params.orderHash,true);
+      }
+      else{
+        callback(params.orderHash, false);
+      }
+
+    }).catch((err)=>{
+      console.log(err);
       callback(params.orderHash, false);
     });
   }

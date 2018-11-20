@@ -1,11 +1,14 @@
 import React, { Component } from 'react'
-import { AppState, View, Text, Image, FlatList, TouchableOpacity} from 'react-native';
+import { AppState, View, Text, Image, FlatList, Clipboard, TouchableOpacity} from 'react-native';
 import axios from 'axios';
 import { observer, inject } from 'mobx-react/native'
 import { action } from 'mobx'
 import LinearGradient from 'react-native-linear-gradient';
+import Toast, {DURATION} from 'react-native-easy-toast'
 const timer = require('react-native-timer');
 var numeral = require('numeral');
+
+
 @inject("appStore") @observer
 export default class WalletScreen extends Component {
   constructor() {
@@ -49,13 +52,27 @@ export default class WalletScreen extends Component {
   }
 
   requestSync(){
-    this.props.appStore.requestBalanceSync();
+    let localWallets = this.props.appStore ?this.props.appStore.localWallets : {};
+    for(let address in localWallets){
+      this.props.appStore.requestBalanceSync(this.state.coin, address);
+    }
+
     this.props.appStore.requestPriceSync(this.state.coin);
   }
 
   selectWallet(index){
     this.props.appStore.selectWallet(index);
   }
+
+  showQrCode(address){
+    this.writeToClipboard(address).then(()=>{
+      this.refs.toast.show('copied address!', DURATION.LENGTH_SHORT);
+    });
+  }
+
+  writeToClipboard = async (text) => {
+    await Clipboard.setString(text);
+  };
 
 
 
@@ -64,9 +81,9 @@ export default class WalletScreen extends Component {
     let wallet = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet[this.state.coin] : {};
     let localWallets = this.props.appStore ?this.props.appStore.localWallets : {};
     let selected = this.props.appStore ? this.props.appStore.selectedWallet : 0;
-    console.log('selectaed:'+selected);
+
     let tokens = [];
-    console.log(localWallets);
+
     let currentAddress = '';
     let wallets = [];
     for(let address in localWallets){
@@ -75,7 +92,7 @@ export default class WalletScreen extends Component {
         currentAddress = address;
       }
     }
-    console.log(currentAddress);
+
     let currentWallet ={};
 
     if(currentAddress){
@@ -97,7 +114,6 @@ export default class WalletScreen extends Component {
     }
 
     tokens.sort((a, b)=>{return a.index - b.index});
-    console.log(currentWallet);
     return (
       <LinearGradient colors={['#5da7dc', '#306eb6']} style={{ flex:1}}>
         <View style={{height:28, marginTop:31}}>
@@ -109,14 +125,14 @@ export default class WalletScreen extends Component {
           }} />
         </View>
 
-
+        <Toast style={{marginBottom:60}} ref="toast"/>
         <View style={{flex:1, marginTop:20,  marginLeft:13, marginRight:13, marginBottom:18, flexDirection:'row', borderRadius:15, backgroundColor:'white'}}>
           <View style={{flex:1}}>
             <Text style={{marginLeft:21, marginTop:21, fontSize:26, color:'rgb(74,74,74)', fontWeight:'bold'}}>{currentWallet.balance?currentWallet.balance.name:this.state.coin} Wallet</Text>
-            <View style={{marginTop:21, flexDirection:'row'}}>
+            <TouchableOpacity onPress={()=>this.showQrCode(currentWallet.address)}  style={{marginTop:21, flexDirection:'row'}}>
               <Text style={{flex:1, marginLeft:30, fontSize:12, color:'rgb(48,110,182)'}}>{currentWallet.address}</Text>
               <Image style={{marginLeft:18, marginRight:30, marginTop:4}} source={require('../../assets/btnDepositQrBig.png')}/>
-            </View>
+            </TouchableOpacity>
             <View style={{flexDirection:'row', height:4, marginTop:8, marginLeft:18, marginRight:18, backgroundColor:'rgb(37,72,143)'}}/>
             <View style={{flex:1, backgroundColor:'rgb(240,240,240)', marginTop:16, borderBottomLeftRadius:15, borderBottomRightRadius:15}}>
               {tokens.map((token, index)=>{

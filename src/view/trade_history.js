@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, Text, Image, TouchableOpacity, ListView, Alert} from 'react-native';
+import { View, Text, Image, TouchableOpacity, ListView,ActivityIndicator, Alert} from 'react-native';
 import DefaultPreference from 'react-native-default-preference';
 import axios from 'axios';
 const moment = require('moment');
@@ -7,6 +7,7 @@ import { observer, inject } from 'mobx-react/native'
 import { action } from 'mobx'
 import LinearGradient from 'react-native-linear-gradient';
 var numeral = require('numeral');
+import Toast, {DURATION} from 'react-native-easy-toast'
 
 @inject("appStore") @observer
 export default class TradeHistory extends Component {
@@ -14,7 +15,8 @@ export default class TradeHistory extends Component {
     super();
 
     this.state = {
-      isProcessing : false,
+      isProcessing:{},
+      list:[],
       selected:0
     };
   }
@@ -22,10 +24,7 @@ export default class TradeHistory extends Component {
   componentDidMount(){
     let token = this.props.navigation.getParam('token', '');
     let coin = this.props.navigation.getParam('coin', '');
-
-    console.log(token);
-    this.props.appStore.requestTradeHistorySync(coin, token);
-
+    this.loadTradeHistory(coin,token);
   }
 
   backNavigation(){
@@ -55,14 +54,51 @@ export default class TradeHistory extends Component {
     this.setState({selected:menu});
   }
 
-  cancelOrder(order){
-    console.log(order);
+  getCurrentWallet(){
+    let localWallets = this.props.appStore ?this.props.appStore.localWallets : {};
+    let selected = this.props.appStore ? this.props.appStore.selectedWallet : 0;
+    let currentWallet = null;
+    for( let address in localWallets ){
+      let wallet = localWallets[address];
+      if(wallet.index == selected){
+        currentWallet = wallet;
+        break;
+      }
+    }
+    return currentWallet;
+  }
+
+  loadTradeHistory( coin, token){
+    console.log(this.getCurrentWallet());
+    this.props.appStore.obtainTradeHistory(coin, token, this.getCurrentWallet().address, this.onLoadTradeHistory);
+  }
+
+  @action.bound
+  onLoadTradeHistory(list){
+
+    this.setState({list:list});
+  }
+
+  cancelOrder(item){
+
     Alert.alert(
       'Cancel Order',
       'Are you cancel order?',
       [
         {text: 'Close', onPress: () => {}, style: 'cancel'},
-        {text: 'Cancel Order', onPress: () => {
+        {text: 'Confirm', onPress: () => {
+            let currentWallet = this.getCurrentWallet();
+            let token = this.props.navigation.getParam('token', '');
+            let coin = this.props.navigation.getParam('coin', '');
+            if(currentWallet){
+              let order = {address:currentWallet.address, privateKey:currentWallet.privateKey, token:token, seller:item.seller, orderHash:item.orderHash, amount:item.amount+'', price:item.price+'', nonce:item.nonce+'', expire:item.expire+''};
+              this.props.appStore.cancelOrder(order, this.canceledOrder);
+
+              let processing = {};
+              Object.assign(processing,this.state.isProcessing);
+              processing[item.orderHash] = true;
+              this.setState({isProcessing:processing});
+            }
           //request cancel
           }},
       ],
@@ -70,27 +106,61 @@ export default class TradeHistory extends Component {
     )
   }
 
+  @action.bound
+  canceledOrder(orderHash, success){
+    console.log('return'+success);
+    if(success){
+      this.refs.toast.show('Success', DURATION.LENGTH_SHORT);
+
+      for(let order of this.state.list){
+        if(order.orderHash === orderHash){
+          order.canceled = moment().valueOf();
+        }
+      }
+    }
+    else{
+      this.refs.toast.show('Request is failed. please try again.', DURATION.LENGTH_SHORT);
+    }
+
+    let processing = {};
+    Object.assign(processing, this.state.isProcessing);
+    processing[orderHash] = false;
+    this.setState({isProcessing:processing});
+  }
+
   render() {
     let token = this.props.navigation.getParam('token', '');
     let coin = this.props.navigation.getParam('coin', '');
-    let wallet = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet : {};
-    let history = (this.props.appStore && this.props.appStore.transactionInit && this.props.appStore.tradeHistory[coin] && this.props.appStore.tradeHistory[coin][token] ) ? this.props.appStore.tradeHistory[coin][token].history : {};
 
     let list = [];
-    for(let tid in history){
-      list.push(history[tid]);
-    }
 
+    for(let order of this.state.list){
+      if(this.state.selected === 0){
+        if(!order.sold && !order.canceled){
+          list.push(order);
+        }
+      }
+      else{
+        if(order.sold){
+          order.timeStamp = order.sold;
+          list.push(order);
+        }
+        else if(order.canceled){
+          order.timeStamp = order.canceled;
+          list.push(order);
+        }
+      }
+    }
 
     if(list.length>0){
-      list.sort((a, b)=>{return  b.timestamp-a.timestamp});
+      list.sort((a, b)=>{return  b.timeStamp-a.timeStamp});
     }
-    console.log(list);
     const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1.tid !== r2.tid});
     let dataSource = ds.cloneWithRows(list);
 
     return (
       <LinearGradient colors={['#5da7dc', '#306eb6']} style={{ flex:1}}>
+        <Toast ref="toast"/>
         <View style={{flexDirection:'row',  marginTop:25, height:30, alignItems:'center'}}>
           <TouchableOpacity style={{marginLeft:13, width:80}} onPress={()=>this.backNavigation()}>
             <Image source={require('../../assets/btnCommonBackShadow.png')}/>
@@ -111,6 +181,7 @@ export default class TradeHistory extends Component {
               체결 내역
             </Text>
           </View>
+
           <View style={{flexDirection:'row', marginTop:27}}>
             <Text style={{fontSize:14,  marginLeft:25, color:'rgb(37,72,143)', letterSpacing:0.7}}>
               Type
@@ -119,20 +190,21 @@ export default class TradeHistory extends Component {
               Price
             </Text>
             <Text style={{fontSize:14, color:'rgb(37,72,143)', marginRight:14, letterSpacing:0.7}}>
-              Amount / Fee
+              Amount / Total
             </Text>
           </View>
+
           <View style={{flex:1, flexDirection:'row', marginLeft:14, marginRight:14,  marginTop:8, marginBottom:28}}>
-            <ListView style={{flex:1}} dataSource={dataSource}
+            {(list.length>0)?(<ListView style={{flex:1}} dataSource={dataSource}
                       renderRow={(rowData) =>
                         <View >
                           <View style={{flexDirection:'row', height:60, alignItems:'center'}}>
 
                             <View>
                               <View style={{flexDirection:'row', alignItems:'center'}}>
-                                <View style={{width:18, height:18, borderRadius:90,  alignItems:'center', justifyContent:'center', backgroundColor:(rowData.type==='buy'?'rgb(95,173,4)':'rgb(182,0,100)')}}>
+                                <View style={{width:18, height:18, borderRadius:90,  alignItems:'center', justifyContent:'center', backgroundColor:(rowData.isBoaught?'rgb(95,173,4)':'rgb(182,0,100)')}}>
                                   <Text style={{color:'white', fontSize:14, fontWeight:'bold'}}>
-                                    {rowData.type==='buy'?'B':'S'}
+                                    {rowData.isBoaught?'B':(rowData.canceled?'C':'S')}
                                   </Text>
                                 </View>
                                 <Text style={{marginLeft:4, fontSize:16, color:'black'}}>
@@ -143,24 +215,24 @@ export default class TradeHistory extends Component {
                                 </Text>
                               </View>
                               <Text>
-                                {moment(rowData.timestamp,'X').format('MM-DD hh:mm:ss')}
+                                {moment(rowData.timeStamp).format('MM-DD hh:mm:ss')}
                               </Text>
                             </View>
 
                             <Text style={{flex:1, fontSize:14, marginLeft:12, color:'rgb(155,155,155)', letterSpacing:0.7}}>{this.numberFormat(rowData.price)}</Text>
 
                             <View style={{marginRight:5, alignItems:'flex-end'}}>
-                              <Text style={{fontSize:12, color:(rowData.type==='buy'?'rgb(95,173,4)':'rgb(182,0,100)'), letterSpacing:0.6}}>{this.numberFormat(rowData.amount)}</Text>
-                              <Text style={{fontSize:12, color:'rgb(155,155,155)', letterSpacing:0.6}}>{this.numberFormat(rowData.gasFee)}</Text>
+                              <Text style={{fontSize:12, color:(rowData.type==='buy'?'rgb(95,173,4)':'rgb(182,0,100)'), letterSpacing:0.6}}>{this.numberFormat(rowData.amount)} {token}</Text>
+                              <Text style={{fontSize:12, color:'rgb(155,155,155)', letterSpacing:0.6}}>{this.numberFormat(rowData.total)} {coin}</Text>
                             </View>
-                            {this.state.selected===0?(<TouchableOpacity onPress={()=>this.cancelOrder(rowData)}><Image source={require('../../assets/btnCommonXRound.png')}/></TouchableOpacity>):null}
-
+                            {this.state.selected===0?(!this.state.isProcessing[rowData.orderHash]?<TouchableOpacity onPress={()=>this.cancelOrder(rowData)}><Image source={require('../../assets/btnCommonXRound.png')}/></TouchableOpacity>:<ActivityIndicator/>):null}
 
                           </View>
                           <View style={{flex:1, backgroundColor:'rgb(230,230,230)', height:1}}/>
                         </View>
-                      }/>
+                      }/>): null}
           </View>
+
         </View>
 
 

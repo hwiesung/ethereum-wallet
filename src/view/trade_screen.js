@@ -13,11 +13,9 @@ export default class TradeScreen extends Component {
   constructor() {
     super();
     this.state = {
-      privateKey: '',
       market: 'FANCO/ETH',
       pay:'ETH',
       token:'FANCO',
-      address:'',
       price:'',
       amount:'',
       isProcessing:{},
@@ -25,28 +23,23 @@ export default class TradeScreen extends Component {
     };
   }
   componentDidMount(){
-    console.log('trade mount');
-    DefaultPreference.get('wallets').then((value)=>{
-      let wallets = [];
-      if(value){
-        let tokens = value.split('/');
-        this.setState({address:tokens[1]});
-      }
-    });
-    this.requestSync();
     AppState.addEventListener('change', this.handleAppStateChange);
 
     this._navListener = this.props.navigation.addListener('willFocus', (route) => {
-      this.requestSync();
+      console.log('trade focused')
     });
 
     this.props.appStore.loadOrderBook(this.state.pay, this.state.token);
+    timer.setInterval(this, 'sync_orders', ()=> {
+      console.log('request');
+      this.props.appStore.requestOrderBookSync();
+    }, 60000);
   }
-
 
   componentWillUnmount(){
     AppState.removeEventListener('change', this.handleAppStateChange);
     this._navListener.remove();
+    timer.clearInterval(this);
   }
 
 
@@ -54,7 +47,7 @@ export default class TradeScreen extends Component {
 
     if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
       console.log('App has come to the foreground!')
-      this.requestSync();
+
     }
     this.setState({appState: nextAppState});
   }
@@ -71,7 +64,6 @@ export default class TradeScreen extends Component {
     let exp = /^[0-9\.]+$/;
     if(text.length > 0){
       let available = text.match(exp);
-      console.log(available);
       if(available){
 
       }
@@ -87,7 +79,6 @@ export default class TradeScreen extends Component {
     let exp = /^[0-9]+$/;
     if(text.length > 0){
       let available = text.match(exp);
-      console.log(available);
       if(available){
 
       }
@@ -111,12 +102,15 @@ export default class TradeScreen extends Component {
   }
 
   getCoinAmount(){
-    let wallet = (this.props.appStore && this.props.appStore.walletInit && this.props.appStore.wallet[this.state.pay][this.state.address]) ? this.props.appStore.wallet[this.state.pay][this.state.address] : {};
+    let localWallet = this.getCurrentWallet();
+    let wallet = (localWallet && this.props.appStore && this.props.appStore.walletInit && this.props.appStore.wallet[this.state.pay][localWallet.address]) ? this.props.appStore.wallet[this.state.pay][localWallet.address] : {};
     return wallet.balance ? parseFloat(wallet.balance.value): 0;
   }
 
   getTokenAmount(){
-    let wallet = (this.props.appStore && this.props.appStore.walletInit && this.props.appStore.wallet[this.state.pay][this.state.address]) ? this.props.appStore.wallet[this.state.pay][this.state.address] : {};
+    let localWallet = this.getCurrentWallet();
+    let wallet = (localWallet && this.props.appStore && this.props.appStore.walletInit && this.props.appStore.wallet[this.state.pay][localWallet.address]) ? this.props.appStore.wallet[this.state.pay][localWallet.address] : {};
+
     return wallet.token && wallet.token[this.state.token] ? wallet.token[this.state.token].value : 0;
   }
 
@@ -161,7 +155,6 @@ export default class TradeScreen extends Component {
   requestSell(){
     const total = this.getAmount() * this.getPrice();
     if(this.getAmount() < 1 || total < 0.05 ){
-      console.log('a');
       this.refs.toast.show('please order over 0.05 ETH ', DURATION.LENGTH_SHORT);
       return;
     }
@@ -237,10 +230,6 @@ export default class TradeScreen extends Component {
     this.setState({isProcessing:processing});
   }
 
-  requestSync(){
-
-  }
-
 
   render() {
     let price = (this.props.appStore && this.props.appStore.priceInit) ? this.props.appStore.price : {};
@@ -248,7 +237,7 @@ export default class TradeScreen extends Component {
     let orderBook = (this.props.appStore && this.props.appStore.orderBookInit) ? this.props.appStore.orderBook : null;
     let asks = [];
     let askMax = 0;
-    console.log(orderBook);
+
     if(orderBook){
       for(let hash in orderBook){
         let order = orderBook[hash];

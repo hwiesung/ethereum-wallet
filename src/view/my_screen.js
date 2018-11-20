@@ -38,7 +38,10 @@ export default class MyScreen extends Component {
   }
 
   requestSync(){
-    this.props.appStore.requestBalanceSync();
+    let localWallets = this.props.appStore ?this.props.appStore.localWallets : {};
+    for(let address in localWallets){
+      this.props.appStore.requestBalanceSync(this.state.coin, address);
+    }
     this.props.appStore.requestPriceSync(this.state.coin);
   }
 
