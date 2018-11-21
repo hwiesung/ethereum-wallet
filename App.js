@@ -22,6 +22,7 @@ import WithdrawalToken from './src/view/withdrawal_token';
 import TradeHistory from './src/view/trade_history';
 import VerifySecretWords from './src/view/verify_secret_words';
 import ManageWallet from './src/view/manage_wallet';
+import EditWallet from './src/view/edit_wallet';
 import { Provider } from 'mobx-react/native';
 import appStore from './src/store/AppStore';
 
@@ -104,6 +105,12 @@ const MyStack = createStackNavigator(
     },
     ManageWallet:{
       screen:ManageWallet,
+      navigationOptions: {
+        header: null
+      }
+    },
+    EditWallet:{
+      screen:EditWallet,
       navigationOptions: {
         header: null
       }

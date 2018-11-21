@@ -21,17 +21,7 @@ export default class ManageWallet extends Component {
   }
 
   componentDidMount(){
-    DefaultPreference.get('wallets').then((value)=>{
-      let wallets = [];
-      if(value){
-        let tokens = value.split('&');
-        for(let token of tokens){
-          let words = token.split()
-        }
-        this.setState({address:tokens[1]});
-      }
 
-    });
 
   }
 
@@ -47,10 +37,12 @@ export default class ManageWallet extends Component {
     this.props.navigation.navigate('AddWallet');
   }
 
+  editWallet(wallet){
+
+    this.props.navigation.navigate('EditWallet', {wallet:wallet});
+  }
 
   render() {
-
-
     let wallets = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet[this.state.coin] : {};
     let localWallets = (this.props.appStore) ? this.props.appStore.localWallets : {};
     let list = [];
@@ -74,12 +66,12 @@ export default class ManageWallet extends Component {
         <View style={{flex:1,  marginLeft:13, marginRight:13,  marginTop:45, marginBottom:28}}>
           {list.map((item, index)=>{
             return (<View key={index} >
-              <View style={{flexDirection:'row', marginBottom:20, height:74, backgroundColor:'white', borderRadius:15, alignItems:'center'}}>
+              <TouchableOpacity onPress={()=>this.editWallet(item)} style={{flexDirection:'row', marginBottom:20, height:74, backgroundColor:'white', borderRadius:15, alignItems:'center'}}>
 
                 <Image style={{marginLeft:20}} source={require('../../assets/btnCommonArrange.png')}/>
                 <Text style={{marginLeft:8, flex:1, fontSize:26, fontWeight:'bold', color:'rgb(74,74,74)'}}>{item.name}</Text>
                 <Image style={{marginRight:24}} source={require('../../assets/btnDepositQrBig.png')}/>
-              </View>
+              </TouchableOpacity>
             </View>)
           })}
 
