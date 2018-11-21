@@ -280,7 +280,7 @@ export default class TradeScreen extends Component {
 
     return (
       <LinearGradient colors={['#5da7dc', '#306eb6']} style={{ flex:1, alignItems: 'center'}}>
-        <View style={{flexDirection:'row', marginTop:10, height:32}}>
+        <View style={{flexDirection:'row', marginTop:20, height:32}}>
           <View style={{flex:1, flexDirection:'row', alignItems:'center', justifyContent:'center'}}>
             <TouchableOpacity style={{flexDirection:'row', alignItems:'center'}} onPress={()=>this.changeMarket()}>
               <Text style={{fontSize:20, marginLeft:52, color:'white'}}>

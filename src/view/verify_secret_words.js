@@ -162,7 +162,7 @@ export default class VerifySecretWords extends Component {
 
     return (
       <View style={{ flex: 1, alignItems: 'center', backgroundColor:'white'}}>
-        <Text style={{marginTop:98, fontSize:22, color:'black', fontWeight:'bold'}}>Verify Phrase</Text>
+        <Text style={{marginTop:60, fontSize:22, color:'black', fontWeight:'bold'}}>Verify Phrase</Text>
         <Text style={{marginTop:20, marginLeft:26, marginRight:26, fontSize:16, textAlign:'center', color:'rgb(155,155,155)'}}>Select the word in the right order</Text>
         <View style={{width:350,  alignItems:'center', height:160, borderWidth:1, borderColor:'rgb(220,220,220)', borderRadius:5, marginTop:28, backgroundColor:'rgb(243,243,243)'}}>
           {selectedView.map((line,index)=>{
@@ -175,7 +175,7 @@ export default class VerifySecretWords extends Component {
             );
           })}
         </View>
-        <View style={{flex:1, alignItems:'center', marginTop:64}}>
+        <View style={{flex:1, alignItems:'center', marginTop:40}}>
           {candidatedView.map((line, index)=>{
             return (
               <View key={index} style={{flexDirection:'row', marginTop:10}}>

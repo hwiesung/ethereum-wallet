@@ -78,7 +78,6 @@ export default class BackupWallet extends Component {
   render() {
 
     let btnColor = (this.state.agree)? ['#5da7dc', '#306eb6']: ['#dbdbdb','#b5b5b5'];
-    let checkBackground = (this.state.agree)?'blue':'white';
     return (
       <View style={{ flex: 1, backgroundColor:'white'}}>
         <TouchableOpacity style={{marginLeft:14, marginTop:25, width:100, height:44}} onPress={()=>this.backNavigation()}>
@@ -92,7 +91,7 @@ export default class BackupWallet extends Component {
           </View>
 
           {(!this.state.isProcessing)?(<TouchableOpacity style={{ flexDirection:'row', marginBottom:21}} onPress={()=>this.clickAgree()}>
-            <View style={{width:26, height:26, borderWidth:2, marginTop:4, backgroundColor:checkBackground, borderColor:'rgb(48,110,182)'}}/>
+            {this.state.agree?<Image source={require('../../assets/btnCommonCheckFill.png')}/>:<Image source={require('../../assets/btnCommonCheckEmpty.png')}/>}
             <Text style={{width:280, marginLeft:14, fontSize:14, color:'black' }}>I understand that if I lose my secret phrase, I will not be able to access my account.</Text>
           </TouchableOpacity>):null}
 

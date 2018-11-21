@@ -61,7 +61,7 @@ export default class CreatePrivateKeyScreen extends Component {
       <View style={{ flex: 1, alignItems: 'center', backgroundColor:'white'}}>
 
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor:'white' }}>
-          <Text style={{marginTop:98, fontSize:22, color:'black', fontWeight:'bold'}}>Backup Phrase</Text>
+          <Text style={{marginTop:60, fontSize:22, color:'black', fontWeight:'bold'}}>Backup Phrase</Text>
           <Text style={{marginTop:20, marginLeft:26, marginRight:26, fontSize:16, textAlign:'center', color:'rgb(155,155,155)'}}> These 12 words are the only way to restore your Trust wallet. save them somewhere safe and secret</Text>
 
           <View style={{borderRadius:5, borderWidth:1, borderColor:'rgb(220,220,220)', backgroundColor:'rgb(243,243,243)', width:330, paddingTop:10, paddingBottom:10, paddingLeft:31, paddingRight:31, marginTop:158}}>
