@@ -52,46 +52,30 @@ export default class FindWalletFromWords extends Component {
   }
 
   findWallet(){
+    if(Object.keys(this.props.appStore.localWallets).length > 1){
+      this.refs.toast.show('Wallet is already existed', DURATION.LENGTH_SHORT);
+      return;
+    }
+
     this.setState({isProcessing:true});
-    let address = '';
-    let privateKey = '';
-    let mnemonic =this.state.value;
-    instance.post('restore_wallet', {mnemonic:mnemonic}).then( (result)=>{
-      console.log(result.data);
-      let ret = result.data.ret_code;
-      if(ret === 0){
-        address = result.data.address;
-        privateKey = result.data.privateKey;
-        let newWallet = {address:address, mnemonic:mnemonic};
-        this.props.appStore.saveWallet(this.state.coin, newWallet, privateKey, this.walletCreated);
-      }
-      else if(ret === 1){
-        throw 'Wrong secret words';
-      }
-      else if(ret === 2){
-        throw 'There is no wallet';
-      }
-    }).catch((err)=>{
-      this.refs.toast.show(err, DURATION.LENGTH_SHORT);
-      this.setState({isProcessing:false});
-    });
+
+    let mnemonic = this.state.value;
+    this.props.appStore.obtainNewAccount(this.accountObtained, mnemonic);
   }
+
+  @action.bound
+  accountObtained(account){
+    console.log(account);
+    let newWallet = {address:account.address, isImported:false};
+    this.props.appStore.saveWallet(this.state.coin, newWallet, account.privateKey, account.mnemonic, this.walletCreated);
+  }
+
 
   @action.bound
   walletCreated(){
     console.log('wallet added!!!');
     this.setState({isProcessing:false});
-    if(Object.keys(this.props.appStore.localWallets).length > 1){
-      this.props.navigation.dispatch(StackActions.reset({
-        index: 0,
-        key: null,
-        actions: [NavigationActions.navigate({ routeName: 'MyHome' })]
-      }));
-    }
-    else{
-      this.props.navigation.navigate('CompleteWallet', {msg:'Wallet added!'});
-    }
-
+    this.props.navigation.navigate('CompleteWallet', {msg:'Wallet added!'});
   }
 
   render() {

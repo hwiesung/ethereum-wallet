@@ -400,14 +400,6 @@ class AppStore {
   }
 
   @action
-  createNewWallet(coin, isBackup, callback){
-    const account =  web3.eth.accounts.create();
-
-    let newWallet = {address:account.address.toLowerCase()};
-    this.saveWallet(coin, newWallet, account.privateKey, callback);
-  }
-
-  @action
   obtainNewAccount(callback, mnemonic, index){
     if(!mnemonic){
       mnemonic = bip39.generateMnemonic();
