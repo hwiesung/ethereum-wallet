@@ -3,6 +3,7 @@ import { firebaseApp } from '../firebase'
 import axios from 'axios';
 const moment = require('moment');
 import DefaultPreference from 'react-native-default-preference';
+import Config from 'react-native-config'
 
 const instance = axios.create({
   baseURL: 'https://us-central1-sonder-6287a.cloudfunctions.net/',
@@ -27,7 +28,7 @@ const serverInfo = {
   }
 };
 
-const web3 = new Web3(new Web3.providers.HttpProvider(serverInfo[mode].infura));
+const web3 = new Web3(new Web3.providers.HttpProvider(Config.INFURA_URL));
 
 
 class AppStore {

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.lugg.ReactNativeConfig.ReactNativeConfigPackage;
 import com.BV.LinearGradient.LinearGradientPackage;
 import com.reactlibrary.RNDefaultPreferencePackage;
 import com.facebook.react.ReactNativeHost;
@@ -46,6 +47,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.asList(
         new MainReactPackage(),
+            new ReactNativeConfigPackage(),
             new LinearGradientPackage(),
             new RNDefaultPreferencePackage(),
         new RNFirebasePackage(),
