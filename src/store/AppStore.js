@@ -9,6 +9,26 @@ const instance = axios.create({
   timeout: 180000,
   headers: {'Content-Type':'application/json'}
 });
+var Web3 = require('web3');
+const mode = 'rinkeby';
+const serverInfo = {
+  mainnet:{
+    infura:'https://mainnet.infura.io/v3/47d5cdf9890f40fdaac1a17809c96fe1',
+    etherscan:'https://api.etherscan.io/api?',
+    tokens:['0xc969a8dd7e222598b4705a5108667ecf7cecd1cd'],
+    exchange:'0x12459C951127e0c374FF9105DdA097662A027093'
+
+  },
+  rinkeby:{
+    infura:'https://rinkeby.infura.io/v3/47d5cdf9890f40fdaac1a17809c96fe1',
+    etherscan:'https://api-rinkeby.etherscan.io/api?',
+    tokens:['0xbD89E073e2827773D0A27545706568A109A8353F'],
+    exchange:'0xeeAcC734a848C51FdBDcd081A5A6a5c691A8Ca2E'
+  }
+};
+
+const web3 = new Web3(new Web3.providers.HttpProvider(serverInfo[mode].infura));
+
 
 class AppStore {
   @observable uid = null;
@@ -384,6 +404,17 @@ class AppStore {
       console.log(err);
       callback(params.orderHash, false);
     });
+  }
+
+  @action
+  obtainAccountFromPK(privateKey, callback) {
+    if(privateKey.indexOf('0x') < 0 ){
+      privateKey = '0x'+privateKey;
+    }
+    const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+    console.log(account);
+    callback(account);
+
   }
 
 }

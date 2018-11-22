@@ -8,6 +8,7 @@ import { action } from 'mobx'
 import LinearGradient from 'react-native-linear-gradient';
 var numeral = require('numeral');
 
+
 @inject("appStore") @observer
 export default class EditWallet extends Component {
   constructor() {

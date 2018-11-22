@@ -1,4 +1,5 @@
 import React from 'react';
+import './global';
 import { createStackNavigator, createBottomTabNavigator, createSwitchNavigator } from 'react-navigation';
 
 import { Image} from 'react-native';

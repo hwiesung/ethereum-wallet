@@ -57,22 +57,27 @@ export default class FindWalletFromPrivateKey extends Component {
 
   findWallet(){
     this.setState({isProcessing:true});
-    let address = '';
-    let privateKey = '';
-    instance.post('privateKey',{privateKey:this.state.value}).then( (result)=>{
-      console.log(result);
-      address = result.data.address.toLowerCase();
-      privateKey = result.data.privateKey;
 
-      let newWallet = {address:address, mnemonic:'', encrypted:''};
-
-      this.props.appStore.saveWallet(this.state.coin, newWallet, privateKey, this.walletCreated);
-    }).catch((err)=>{
-      this.refs.toast.show('Failed to add wallet, try again later.', DURATION.LENGTH_SHORT);
-      this.setState({isProcessing:false});
-    });
+    this.props.appStore.obtainAccountFromPK(this.state.value, this.accountObtained);
+    // instance.post('privateKey',{privateKey:this.state.value}).then( (result)=>{
+    //   console.log(result);
+    //   address = result.data.address.toLowerCase();
+    //   privateKey = result.data.privateKey;
+    //
+    //   let newWallet = {address:address, mnemonic:'', encrypted:''};
+    //
+    //   this.props.appStore.saveWallet(this.state.coin, newWallet, privateKey, this.walletCreated);
+    // }).catch((err)=>{
+    //   this.refs.toast.show('Failed to add wallet, try again later.', DURATION.LENGTH_SHORT);
+    //   this.setState({isProcessing:false});
+    // });
   }
 
+  @action.bound
+  accountObtained(account){
+    let newWallet = {address:account.address.toLowerCase(), mnemonic:'', encrypted:''};
+    this.props.appStore.saveWallet(this.state.coin, newWallet, account.privateKey, this.walletCreated);
+  }
 
   @action.bound
   walletCreated(address){
