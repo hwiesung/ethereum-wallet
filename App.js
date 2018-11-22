@@ -218,10 +218,16 @@ const LoginStack = createStackNavigator(
       }
     },
     Secret: {
-      screen: CreatePrivateKeyScreen
+      screen: CreatePrivateKeyScreen,
+      navigationOptions: {
+        header: null
+      }
     },
     VerifySecret:{
-      screen: VerifySecretWords
+      screen: VerifySecretWords,
+      navigationOptions: {
+        header: null
+      }
     }
   }
 );

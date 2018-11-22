@@ -40,24 +40,23 @@ export default class BackupWallet extends Component {
     this.props.navigation.pop();
   }
 
-  createWallet(){
-    let address = '';
-    let privateKey = '';
-    this.setState({isProcessing:true});
-    instance.post('create_wallet', {backupYn:false}).then( (result)=>{
-      console.log(result.data);
-      address = result.data.address;
-      privateKey = result.data.privateKey;
-      let newWallet = {address:address, mnemonic:'', encrypted:''};
-      this.props.appStore.saveWallet(this.state.coin, newWallet, privateKey, this.walletCreated);
-
-    });
-
-  }
-
   clickAgree(){
     this.setState({agree:!this.state.agree});
   }
+
+  createWallet(){
+    this.setState({isProcessing:true});
+    this.props.appStore.obtainNewAccount(this.accountObtained);
+
+  }
+
+  @action.bound
+  accountObtained(account){
+    console.log(account);
+    let newWallet = {address:account.address, isImported:false};
+    this.props.appStore.saveWallet(this.state.coin, newWallet, account.privateKey, account.mnemonic, this.walletCreated);
+  }
+
 
   @action.bound
   walletCreated(){
@@ -99,9 +98,9 @@ export default class BackupWallet extends Component {
             <Text style={{color:'white', fontSize:20, fontWeight:'bold'}} >Continue</Text>
           </LinearGradient></TouchableOpacity>):<ActivityIndicator/>}
 
-          <Text style={{marginBottom:52, fontSize:16, color:'rgb(47,109,182)'}} onPress={()=>this.createWallet()}>
+          {(!this.state.isProcessing)?(<Text style={{marginBottom:52, fontSize:16, color:'rgb(47,109,182)'}} onPress={()=>this.createWallet()}>
             Skip
-          </Text>
+          </Text>):null}
 
         </View>
 

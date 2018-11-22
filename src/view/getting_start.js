@@ -28,6 +28,7 @@ export default class GettingStart extends Component {
     console.log(this.props.appStore);
     if(this.props.appStore.userInit){
       DefaultPreference.set('wallets','').then(()=>{
+        console.log('clear wallet');
         this.props.appStore.loadLocalWallet();
         this.props.navigation.navigate('CreateWallet');
       })

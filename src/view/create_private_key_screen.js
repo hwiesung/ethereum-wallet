@@ -1,17 +1,11 @@
 import React, { Component } from 'react'
-import { View,  Button, Text, ActivityIndicator, Clipboard,TouchableOpacity} from 'react-native';
-
-import axios from 'axios';
+import { View,  Button, Text, ActivityIndicator, Clipboard,TouchableOpacity, Image} from 'react-native';
+import { action } from 'mobx'
 import { observer, inject } from 'mobx-react/native'
 import Toast, {DURATION} from 'react-native-easy-toast'
 
-import DefaultPreference from 'react-native-default-preference';
 import LinearGradient from 'react-native-linear-gradient';
-const instance = axios.create({
-  baseURL: 'https://us-central1-sonder-6287a.cloudfunctions.net/',
-  timeout: 5000,
-  headers: {'Content-Type':'application/json'}
-});
+
 
 @inject("appStore") @observer
 export default class CreatePrivateKeyScreen extends Component {
@@ -29,17 +23,17 @@ export default class CreatePrivateKeyScreen extends Component {
 
   componentDidMount() {
 
-    instance.post('create_wallet', {backupYn:true}).then( (result)=>{
-      console.log(result.data);
-      this.setState({address:result.data.address, privateKey:result.data.privateKey, encrypted:result.data.encrypted, mnemonic:result.data.mnemonic, isProcessing:false});
+    this.props.appStore.obtainNewAccount(this.accountObtained);
+  }
 
-    }).catch((err)=>{
-      console.log(err);
-    });
+  @action.bound
+  accountObtained(account){
+    console.log(account);
+    this.setState({address:account.address, privateKey:account.privateKey, mnemonic:account.mnemonic, isProcessing:false});
   }
 
   moveToVerify(){
-    this.props.navigation.navigate('VerifySecret', {address:this.state.address, privateKey:this.state.privateKey, encrypted:this.state.encrypted, mnemonic:this.state.mnemonic});
+    this.props.navigation.navigate('VerifySecret', {address:this.state.address, privateKey:this.state.privateKey, mnemonic:this.state.mnemonic});
   }
 
   copyWords(){
@@ -51,6 +45,10 @@ export default class CreatePrivateKeyScreen extends Component {
 
   }
 
+  backNavigation(){
+    this.props.navigation.pop();
+  }
+
   writeToClipboard = async () => {
     await Clipboard.setString(this.state.mnemonic);
     this.refs.toast.show('copied to clipboard', DURATION.LENGTH_SHORT);
@@ -58,8 +56,10 @@ export default class CreatePrivateKeyScreen extends Component {
 
   render() {
     return (
-      <View style={{ flex: 1, alignItems: 'center', backgroundColor:'white'}}>
-
+      <View style={{ flex: 1, backgroundColor:'white'}}>
+        <TouchableOpacity style={{marginLeft:14, marginTop:25, width:100, height:44}} onPress={()=>this.backNavigation()}>
+          <Image source={require('../../assets/btnCommonX44Pt.png')}/>
+        </TouchableOpacity>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor:'white' }}>
           <Text style={{marginTop:60, fontSize:22, color:'black', fontWeight:'bold'}}>Backup Phrase</Text>
           <Text style={{marginTop:20, marginLeft:26, marginRight:26, fontSize:16, textAlign:'center', color:'rgb(155,155,155)'}}> These 12 words are the only way to restore your Trust wallet. save them somewhere safe and secret</Text>
@@ -72,9 +72,12 @@ export default class CreatePrivateKeyScreen extends Component {
           {(!this.state.isProcessing)?(<Text style={{marginTop:26, fontSize:16, color:'rgb(47,109,182)' }} onPress={()=>this.copyWords()}>Copy Text</Text>):null}
         </View>
 
-        {(!this.state.isProcessing)?(<TouchableOpacity onPress={()=>this.moveToVerify()}><LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#5da7dc', '#306eb6']} style={{justifyContent: 'center',alignItems: 'center', borderRadius:12, marginBottom:38, backgroundColor:'rgb(48,110,182)',  width:330, height:58}}>
+        <View style={{flexDirection:'row'}}>
+          {(!this.state.isProcessing)?(<TouchableOpacity onPress={()=>this.moveToVerify()} style={{flex:1, alignItems:'center'}}><LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#5da7dc', '#306eb6']} style={{justifyContent: 'center',alignItems: 'center', borderRadius:12, marginBottom:38, backgroundColor:'rgb(48,110,182)',  width:330, height:58}}>
             <Text style={{color:'white', fontSize:20, fontWeight:'bold'}} >Next</Text>
           </LinearGradient></TouchableOpacity>):null}
+        </View>
+
 
         <Toast ref="toast"/>
       </View>

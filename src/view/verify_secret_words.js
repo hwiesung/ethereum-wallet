@@ -1,19 +1,14 @@
 import React, { Component } from 'react'
-import { View,  Button, Text, ActivityIndicator,TouchableOpacity} from 'react-native';
+import { View,  Button, Text, ActivityIndicator,TouchableOpacity, Image} from 'react-native';
 
 import axios from 'axios';
 import { observer, inject } from 'mobx-react/native';
 import { action } from 'mobx'
 import Toast, {DURATION} from 'react-native-easy-toast'
 
-import DefaultPreference from 'react-native-default-preference';
 import LinearGradient from 'react-native-linear-gradient';
 import {NavigationActions, StackActions} from "react-navigation";
-const instance = axios.create({
-  baseURL: 'https://us-central1-sonder-6287a.cloudfunctions.net/',
-  timeout: 1000,
-  headers: {'Content-Type':'application/json'}
-});
+
 const WORD_SIZE = 12;
 
 @inject("appStore") @observer
@@ -63,8 +58,8 @@ export default class VerifySecretWords extends Component {
 
     this.setState({isProcessing:true});
 
-    let newWallet = {address:this.state.address, mnemonic:this.state.mnemonic, encrypted:this.state.encrypted};
-    this.props.appStore.saveWallet(this.state.coin, newWallet, this.state.privateKey, this.walletCreated);
+    let newWallet = {address:this.state.address, isImported:false};
+    this.props.appStore.saveWallet(this.state.coin, newWallet, this.state.privateKey, this.state.mnemonic, this.walletCreated);
   }
 
   selectWord(word){
@@ -119,6 +114,10 @@ export default class VerifySecretWords extends Component {
 
   }
 
+  backNavigation(){
+    this.props.navigation.pop();
+  }
+
 
 
   render() {
@@ -161,34 +160,40 @@ export default class VerifySecretWords extends Component {
     let btnColor = (this.state.verified)? ['#5da7dc', '#306eb6']: ['#dbdbdb','#b5b5b5'];
 
     return (
-      <View style={{ flex: 1, alignItems: 'center', backgroundColor:'white'}}>
-        <Text style={{marginTop:60, fontSize:22, color:'black', fontWeight:'bold'}}>Verify Phrase</Text>
-        <Text style={{marginTop:20, marginLeft:26, marginRight:26, fontSize:16, textAlign:'center', color:'rgb(155,155,155)'}}>Select the word in the right order</Text>
-        <View style={{width:350,  alignItems:'center', height:160, borderWidth:1, borderColor:'rgb(220,220,220)', borderRadius:5, marginTop:28, backgroundColor:'rgb(243,243,243)'}}>
-          {selectedView.map((line,index)=>{
-            return (
-              <View key={index} style={{flexDirection:'row', marginTop:10}}>
-                {line.map((item)=>{
-                  return item;
-                })}
-              </View>
-            );
-          })}
+      <View style={{ flex: 1, backgroundColor:'white'}}>
+        <TouchableOpacity style={{marginLeft:14, marginTop:25, width:100, height:44}} onPress={()=>this.backNavigation()}>
+          <Image source={require('../../assets/btnCommonX44Pt.png')}/>
+        </TouchableOpacity>
+        <View style={{flex:1, alignItems:'center'}}>
+          <Text style={{marginTop:60, fontSize:22, color:'black', fontWeight:'bold'}}>Verify Phrase</Text>
+          <Text style={{marginTop:20, marginLeft:26, marginRight:26, fontSize:16, textAlign:'center', color:'rgb(155,155,155)'}}>Select the word in the right order</Text>
+          <View style={{width:350,  alignItems:'center', height:160, borderWidth:1, borderColor:'rgb(220,220,220)', borderRadius:5, marginTop:28, backgroundColor:'rgb(243,243,243)'}}>
+            {selectedView.map((line,index)=>{
+              return (
+                <View key={index} style={{flexDirection:'row', marginTop:10}}>
+                  {line.map((item)=>{
+                    return item;
+                  })}
+                </View>
+              );
+            })}
+          </View>
+          <View style={{flex:1, alignItems:'center', marginTop:40}}>
+            {candidatedView.map((line, index)=>{
+              return (
+                <View key={index} style={{flexDirection:'row', marginTop:10}}>
+                  {line.map((item)=>{
+                    return item;
+                  })}
+                </View>
+              );
+            })}
+          </View>
+          {(!this.state.isProcessing)?(<TouchableOpacity onPress={()=>this.createWallet()}><LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={btnColor} style={{justifyContent: 'center',alignItems: 'center', borderRadius:12, marginBottom:38, backgroundColor:'rgb(48,110,182)',  width:330, height:58}}>
+            <Text style={{color:'white', fontSize:20, fontWeight:'bold'}}>Next</Text>
+          </LinearGradient></TouchableOpacity>):<ActivityIndicator/>}
         </View>
-        <View style={{flex:1, alignItems:'center', marginTop:40}}>
-          {candidatedView.map((line, index)=>{
-            return (
-              <View key={index} style={{flexDirection:'row', marginTop:10}}>
-                {line.map((item)=>{
-                  return item;
-                })}
-              </View>
-            );
-          })}
-        </View>
-        {(!this.state.isProcessing)?(<TouchableOpacity onPress={()=>this.createWallet()}><LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={btnColor} style={{justifyContent: 'center',alignItems: 'center', borderRadius:12, marginBottom:38, backgroundColor:'rgb(48,110,182)',  width:330, height:58}}>
-          <Text style={{color:'white', fontSize:20, fontWeight:'bold'}}>Next</Text>
-        </LinearGradient></TouchableOpacity>):<ActivityIndicator/>}
+
 
 
         <Toast style={{marginBottom:60}} ref="toast"/>

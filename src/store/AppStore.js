@@ -2,34 +2,21 @@ import { observable, autorun, action } from 'mobx'
 import { firebaseApp } from '../firebase'
 import axios from 'axios';
 const moment = require('moment');
+var bip39 = require('bip39');
+var hdkey = require('ethereumjs-wallet-react-native/hdkey');
 import DefaultPreference from 'react-native-default-preference';
 import Config from 'react-native-config'
 
 const instance = axios.create({
-  baseURL: 'https://us-central1-sonder-6287a.cloudfunctions.net/',
+  baseURL: Config.WALLET_API_URL,
   timeout: 180000,
   headers: {'Content-Type':'application/json'}
 });
 var Web3 = require('web3');
-const mode = 'rinkeby';
-const serverInfo = {
-  mainnet:{
-    infura:'https://mainnet.infura.io/v3/47d5cdf9890f40fdaac1a17809c96fe1',
-    etherscan:'https://api.etherscan.io/api?',
-    tokens:['0xc969a8dd7e222598b4705a5108667ecf7cecd1cd'],
-    exchange:'0x12459C951127e0c374FF9105DdA097662A027093'
-
-  },
-  rinkeby:{
-    infura:'https://rinkeby.infura.io/v3/47d5cdf9890f40fdaac1a17809c96fe1',
-    etherscan:'https://api-rinkeby.etherscan.io/api?',
-    tokens:['0xbD89E073e2827773D0A27545706568A109A8353F'],
-    exchange:'0xeeAcC734a848C51FdBDcd081A5A6a5c691A8Ca2E'
-  }
-};
 
 const web3 = new Web3(new Web3.providers.HttpProvider(Config.INFURA_URL));
 
+const wallet_hdpath = "m/44'/60'/0'/0/";
 
 class AppStore {
   @observable uid = null;
@@ -162,46 +149,40 @@ class AppStore {
   }
 
   @action
-  saveWallet(coin, wallet, privateKey, callback) {
-
+  saveWallet(coin, wallet, privateKey, mnemonic, callback) {
     let index = Object.keys(this.localWallets).length;
     let name = coin +(index>0?index+1:'')  + ' Wallet';
-    let newWallet = {index:index, address:wallet.address, privateKey:privateKey};
+    let newWallet = {index:index, address:wallet.address, privateKey:privateKey, isImported:wallet.isImported, mnemonic:mnemonic, name:name};
+
     wallet.name =name;
     wallet.index = index;
-    firebaseApp.database().ref('/wallets/'+this.uid+'/'+coin+'/'+wallet.address).set(wallet, (err)=>{
+
+    firebaseApp.database().ref('/wallets/'+this.uid+'/'+coin+'/'+wallet.address).set(wallet).then((err)=> {
       if(err){
         console.log('create wallet err');
         console.log(err);
       }
       else{
-
         this.localWallets[wallet.address] = newWallet;
         console.log('before save wallet');
         console.log(this.localWallets);
-        this.saveLocalWallet().then(()=>{
+        let result = '';
+        for(let address in this.localWallets){
+          let wallet = this.localWallets[address];
+          let str = wallet.index+'/'+wallet.address+'/'+wallet.privateKey;
+          if(result){
+            result = result +'&'+str;
+          }
+          else{
+            result = str;
+          }
+        }
+        return DefaultPreference.set('wallets', result).then(()=>{
+          console.log('local wallet saved');
           callback(wallet.address);
         });
-
       }
     });
-  }
-
-  @action.bound
-  saveLocalWallet(){
-    let result = '';
-    for(let address in this.localWallets){
-      let wallet = this.localWallets[address];
-      let str = wallet.index+'/'+wallet.address+'/'+wallet.privateKey;
-      if(result){
-        result = result +'&'+str;
-      }
-      else{
-        result = str;
-      }
-    }
-    console.log(result);
-    return DefaultPreference.set('wallets', result);
   }
 
   @action
@@ -417,6 +398,33 @@ class AppStore {
     callback(account);
 
   }
+
+  @action
+  createNewWallet(coin, isBackup, callback){
+    const account =  web3.eth.accounts.create();
+
+    let newWallet = {address:account.address.toLowerCase()};
+    this.saveWallet(coin, newWallet, account.privateKey, callback);
+  }
+
+  @action
+  obtainNewAccount(callback, mnemonic, index){
+    if(!mnemonic){
+      mnemonic = bip39.generateMnemonic();
+    }
+    if(!index){
+      index = 0;
+    }
+    const hdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeed(mnemonic));
+    const wallet = hdwallet.derivePath(wallet_hdpath + index).getWallet();
+
+    const address = '0x' + wallet.getAddress().toString('hex').toLowerCase();
+    const privateKey = wallet._privKey.toString('hex');
+
+    callback({address:address, privateKey:privateKey, mnemonic:mnemonic});
+  }
+
+
 
 }
 

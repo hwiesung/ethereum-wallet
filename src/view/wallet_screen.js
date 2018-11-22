@@ -99,7 +99,7 @@ export default class WalletScreen extends Component {
       let wallet = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet : {};
       if(wallet[this.state.coin]){
         currentWallet = wallet[this.state.coin][currentAddress];
-
+        console.log(currentWallet);
         tokens.push({name:currentWallet.balance.name, coin:this.state.coin, symbol:currentWallet.balance.symbol, index:0, amount:currentWallet.balance.value, value:numeral(currentWallet.balance.value*price[this.state.coin].price).format('0,0.00')+' USD'});
 
         if(currentWallet.token){
