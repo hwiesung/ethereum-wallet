@@ -15,7 +15,7 @@ export default class SplashScreen extends Component {
   }
 
   isLoadComplete(){
-    return (this.props.appStore.priceInit && this.props.appStore.walletInit && this.props.appStore.transactionInit);
+    return (this.props.appStore.priceInit && this.props.appStore.walletInit && this.props.appStore.transactionInit && this.props.appStore.localWallets);
   }
 
   componentWillMount() {

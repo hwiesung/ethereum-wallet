@@ -74,7 +74,7 @@ export default class WithdrawalAddress extends Component {
     let localWallet = this.props.appStore ? this.props.appStore.localWallets[token.address] : {};
 
     if(this.state.complete && localWallet.privateKey){
-      let params = {from:localWallet.address, to:this.state.value, amount:amount, privateKey:localWallet.privateKey, token:token.symbol};
+      let params = {from:localWallet.address, to:this.state.value, amount:amount, privateKey:localWallet.privateKey, contract:token.contract};
       console.log(params);
       this.setState({isProcessing:true});
       if(token.symbol === token.coin){

@@ -78,11 +78,12 @@ export default class WalletScreen extends Component {
 
   render() {
     let price = (this.props.appStore && this.props.appStore.priceInit) ? this.props.appStore.price : {};
+    let tokens = (this.props.appStore && this.props.appStore.tokens) ? this.props.appStore.tokens : {};
     let wallet = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet[this.state.coin] : {};
     let localWallets = this.props.appStore ?this.props.appStore.localWallets : {};
     let selected = this.props.appStore ? this.props.appStore.selectedWallet : 0;
 
-    let tokens = [];
+    let tokenList = [];
 
     let currentAddress = '';
     let wallets = [];
@@ -94,26 +95,36 @@ export default class WalletScreen extends Component {
     }
 
     let currentWallet ={};
-
     if(currentAddress){
       let wallet = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet : {};
+      console.log(wallet);
       if(wallet[this.state.coin]){
         currentWallet = wallet[this.state.coin][currentAddress];
-        console.log(currentWallet);
-        tokens.push({name:currentWallet.balance.name, coin:this.state.coin, symbol:currentWallet.balance.symbol, index:0, amount:currentWallet.balance.value, value:numeral(currentWallet.balance.value*price[this.state.coin].price).format('0,0.00')+' USD'});
+        console.log(price);
 
-        if(currentWallet.token){
-          Object.keys(currentWallet.token).forEach((symbol)=>{
-            let token = currentWallet.token[symbol];
-            let rate = price[this.state.coin][symbol].last * price[this.state.coin].price;
-            tokens.push({name:token.name, coin:this.state.coin, symbol:token.symbol, index:token.index, amount:token.value, value:numeral(token.value*rate).format('0,0.00')+' USD'});
+        console.log("wallet:");
+        console.log(currentWallet);
+        let ethPrice = price[this.state.coin].price ? price[this.state.coin].price :0;
+        console.log(ethPrice);
+        tokenList.push({name:currentWallet.balance.name, coin:this.state.coin, symbol:currentWallet.balance.symbol, index:0, amount:currentWallet.balance.value, value:numeral(currentWallet.balance.value*ethPrice).format('0,0.00')+' USD'});
+
+        if(tokens[this.state.coin]){
+          console.log('tokens');
+          console.log(tokens);
+          Object.keys(tokens[this.state.coin]).forEach((contract)=>{
+            if(currentWallet.token[contract]){
+              let token = currentWallet.token[contract];
+              let rate = tokens[this.state.coin][contract].price * ethPrice;
+              tokenList.push({name:token.name, contract:token.address, coin:this.state.coin, symbol:token.symbol, index:token.index, amount:token.value, value:numeral(token.value*rate).format('0,0.00')+' USD'});
+            }
           });
         }
+
 
       }
     }
 
-    tokens.sort((a, b)=>{return a.index - b.index});
+    tokenList.sort((a, b)=>{return a.index - b.index});
     return (
       <LinearGradient colors={['#5da7dc', '#306eb6']} style={{ flex:1}}>
         <View style={{height:28, marginTop:31}}>
@@ -135,7 +146,7 @@ export default class WalletScreen extends Component {
             </TouchableOpacity>
             <View style={{flexDirection:'row', height:4, marginTop:8, marginLeft:18, marginRight:18, backgroundColor:'rgb(37,72,143)'}}/>
             <View style={{flex:1, backgroundColor:'rgb(240,240,240)', marginTop:16, borderBottomLeftRadius:15, borderBottomRightRadius:15}}>
-              {tokens.map((token, index)=>{
+              {tokenList.map((token, index)=>{
                 token.address = currentAddress;
                 return (
                   <TouchableOpacity key={index} style={{flexDirection:'row'}} onPress={()=>this.moveDetail(token)}>

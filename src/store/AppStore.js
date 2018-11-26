@@ -7,7 +7,7 @@ var hdkey = require('ethereumjs-wallet-react-native/hdkey');
 import DefaultPreference from 'react-native-default-preference';
 import Config from 'react-native-config'
 import {Clipboard} from "react-native";
-
+const tokenABI = require('../constants/tokenABI');
 const instance = axios.create({
   baseURL: Config.WALLET_API_URL,
   timeout: 180000,
@@ -29,13 +29,17 @@ class AppStore {
   @observable selectedWallet = null;
   @observable orderBook = null;
   @observable orderBookInit = null;
+  @observable tokens = null;
+  @observable localWallets = null;
+  @observable transactions = null;
   init(user){
     this.uid = user;
     this.user = null;
     this.wallet = null;
-    this.localWallets = {};
+    this.localWallets = null;
     this.price = null;
     this.transactions = null;
+    this.tokens = null;
     this.orderBook = null;
     this.userInit= false;
     this.priceInit = false;
@@ -43,6 +47,7 @@ class AppStore {
     this.transactionInit = false;
     this.orderBookInit = null;
     this.selectedWallet = 0;
+    this.contracts = {};
     console.log('init User:'+this.uid);
     this.loadData()
   }
@@ -54,6 +59,7 @@ class AppStore {
     this.loadUserInfo();
     this.loadWallet();
     this.loadPrice();
+    this.loadToken();
     this.loadTransactions();
   }
   @action
@@ -123,6 +129,26 @@ class AppStore {
       this.price = snapshot.val();
       this.priceInit = true;
       console.log('price loaded');
+    }
+  }
+
+  @action
+  loadToken() {
+    if(this.tokens){
+      console.log('already tokens are loaded!');
+    }
+    else{
+      console.log('request get token');
+      firebaseApp.database().ref('/token').on('value', (snap)=>{this.onLoadTokenComplete(snap)});
+    }
+  }
+
+  @action.bound
+  onLoadTokenComplete(snapshot){
+    if(snapshot.val()){
+      console.log('tokens');
+      this.tokens = snapshot.val();
+      console.log('token loaded');
     }
   }
 
@@ -224,22 +250,29 @@ class AppStore {
 
 
   @action
-  requestTranactionSync(coin, token, address) {
+  requestTranactionSync(coin, contract, symbol, address) {
     let before1min = moment().subtract(1, 'minute').utc().valueOf();
     let updateTime = 0;
-    if(coin === token){
+    console.log(this.transactions);
+    if(coin === symbol){
       updateTime = this.transactions[coin][address].update_time;
     }
     else{
-      updateTime = this.transactions[coin][address].token[token].update_time;
+      if(this.transactions[coin][address] && this.transactions[coin][address].token && this.transactions[coin][address].token[contract]){
+        updateTime = this.transactions[coin][address].token[contract].update_time;
+      }
     }
+    console.log(updateTime);
     if (updateTime < before1min) {
-      console.log('request sync transactions:'+token);
-      if(coin === token){
+      console.log('request sync transactions:'+symbol);
+      if(coin === symbol){
         firebaseApp.database().ref('/sync/' + this.uid + '/'+coin+'/'+address+'/transactions').set(this.transactions[coin][address].lastBlockNumber);
       }
       else{
-        firebaseApp.database().ref('/sync/' + this.uid + '/'+coin+'/'+address+'/token/'+token).set(this.transactions[coin][address].token[token].lastBlockNumber);
+        console.log(this.transactions[coin][address]);
+        let lastBlockNumber = (this.transactions[coin][address] && this.transactions[coin][address].token && this.transactions[coin][address].token[contract])?this.transactions[coin][address].token[contract].lastBlockNumber : 0;
+        console.log(lastBlockNumber);
+        firebaseApp.database().ref('/sync/' + this.uid + '/'+coin+'/'+address+'/token/'+contract).set(lastBlockNumber);
       }
     }
   }
@@ -322,10 +355,35 @@ class AppStore {
 
   @action
   transferToken(params, callback) {
-    params.uid = this.uid;
-    instance.post('transfer_token', params).then( (result)=> {
-      console.log(result.data);
-      callback();
+    let contract = this.contracts[params.contract];
+    if(!contract){
+      contract = new web3.eth.Contract(tokenABI, params.contract);
+    }
+
+    console.log(params);
+
+    const value = web3.utils.toWei(params.amount, 'ether');
+    console.log(value);
+    let data = contract.methods.transfer(params.to, value ).encodeABI();
+    console.log(data);
+    let rawTx = {
+      "gasLimit": web3.utils.toHex(90000),
+      "to": params.contract,
+      "value": "0x00",
+      "data": data,
+    };
+
+    console.log(rawTx);
+
+    web3.eth.accounts.signTransaction(rawTx, params.privateKey).then((signedTx)=>{
+      console.log(signedTx);
+      return web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+    }).then((receipt)=>{
+      console.log(receipt);
+      callback(true, receipt);
+    }).catch((err)=>{
+      console.log(err);
+      callback(false);
     });
   }
 

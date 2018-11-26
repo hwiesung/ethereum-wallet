@@ -60,6 +60,7 @@ export default class WithdrawalToken extends Component {
 
   render() {
     let token = this.props.navigation.getParam('token', {});
+    console.log(token);
     let wallet = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet[token.coin][token.address] : {};
 
     let balance = '';
@@ -68,7 +69,7 @@ export default class WithdrawalToken extends Component {
       balance = wallet.balance?wallet.balance.value:'';
     }
     else{
-      balance = wallet.token && wallet.token[token.symbol]?wallet.token[token.symbol].value:'';
+      balance = wallet.token && wallet.token[token.contract]?wallet.token[token.contract].value:'';
     }
 
 

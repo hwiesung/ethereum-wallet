@@ -21,7 +21,7 @@ export default class TokenDetail extends Component {
   componentDidMount(){
     let token = this.props.navigation.getParam('token', {});
     console.log(token);
-    this.props.appStore.requestTranactionSync(token.coin, token.symbol, token.address);
+    this.props.appStore.requestTranactionSync(token.coin, token.contract,token.symbol,  token.address);
   }
 
   backNavigation(){
@@ -38,6 +38,7 @@ export default class TokenDetail extends Component {
 
   render() {
     let token = this.props.navigation.getParam('token', {});
+    console.log(token);
     let wallet = (this.props.appStore && this.props.appStore.walletInit) ? this.props.appStore.wallet[token.coin][token.address] : {};
     console.log(wallet);
     let history = {};
@@ -47,10 +48,12 @@ export default class TokenDetail extends Component {
       balance = wallet.balance ? wallet.balance.value: '';
     }
     else{  //It is token
-      history = (this.props.appStore && this.props.appStore.transactionInit) ? this.props.appStore.transactions[token.coin][token.address].token[token.symbol].history : {};
-      balance = wallet.token[token.symbol] ? wallet.token[token.symbol].value: '';
+      console.log(token.contract);
+      history = (this.props.appStore && this.props.appStore.transactionInit && this.props.appStore.transactions[token.coin][token.address].token && this.props.appStore.transactions[token.coin][token.address].token[token.contract]) ? this.props.appStore.transactions[token.coin][token.address].token[token.contract].history : {};
+      balance = wallet.token[token.contract] ? wallet.token[token.contract].value: '';
     }
 
+    console.log(history);
     let list = [];
 
     for(let hashKey in history){
@@ -82,6 +85,7 @@ export default class TokenDetail extends Component {
               <Text style={{color:'white', fontSize:20, fontWeight:'bold'}}>Withdrawal</Text>
             </LinearGradient></TouchableOpacity>
             <View style={{flex:1, flexDirection:'row',marginTop:28, marginBottom:28}}>
+              {list.length>0?(
               <ListView style={{flex:1}} dataSource={dataSource}
                         renderRow={(rowData) =>
                           <View >
@@ -99,7 +103,7 @@ export default class TokenDetail extends Component {
                               <Text style={{fontSize:16, color:'rgb(128,128,128)', marginRight:12}}>{token.symbol}</Text>
                             </View>
                           </View>
-                        }/>
+                        }/>):null}
             </View>
 
           </View>

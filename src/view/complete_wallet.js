@@ -18,7 +18,7 @@ export default class CompleteWallet extends Component {
   }
 
   isComplete(){
-    return (this.props.appStore.priceInit && this.props.appStore.walletInit && this.props.appStore.transactionInit);
+    return (this.props.appStore.priceInit && this.props.appStore.walletInit && this.props.appStore.transactionInit && this.props.appStore.localWallets);
   }
 
 
