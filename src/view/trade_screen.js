@@ -3,7 +3,7 @@ import {View, Text, Image, TouchableOpacity, ActivityIndicator, TextInput, ListV
 import { observer, inject } from 'mobx-react/native'
 import { action } from 'mobx'
 import LinearGradient from 'react-native-linear-gradient';
-import DefaultPreference from "react-native-default-preference";
+
 var numeral = require('numeral');
 import Toast, {DURATION} from 'react-native-easy-toast'
 const timer = require('react-native-timer');

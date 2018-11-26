@@ -6,6 +6,7 @@ var bip39 = require('bip39');
 var hdkey = require('ethereumjs-wallet-react-native/hdkey');
 import DefaultPreference from 'react-native-default-preference';
 import Config from 'react-native-config'
+import {Clipboard} from "react-native";
 
 const instance = axios.create({
   baseURL: Config.WALLET_API_URL,
@@ -290,12 +291,32 @@ class AppStore {
     }
   }
 
+  getCurrentBlockNumber = async () => {
+    const currentBlockNumber = await web3.eth.getBlockNumber();
+
+    console.log(currentBlockNumber);
+    return currentBlockNumber;
+  };
+
   @action
   sendTransaction(params, callback) {
-    params.uid = this.uid;
-    instance.post('send_transaction', params).then( (result)=> {
-      console.log(result.data);
-      callback();
+    var rawTransaction = {
+      "from": params.from,
+      "to": params.to,
+      "value": web3.utils.toHex(web3.utils.toWei(params.amount, "ether")),
+      "gas": web3.utils.toHex(30000),
+      "gasPrice":web3.utils.toHex(web3.utils.toWei("50","gwei"))
+    };
+    console.log(rawTransaction);
+    console.log(params.privateKey);
+    web3.eth.accounts.signTransaction(rawTransaction, params.privateKey).then((signedTx)=>{
+      console.log(signedTx);
+      return web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+    }).then((receipt)=>{
+      callback(true, receipt);
+    }).catch((err)=>{
+      console.log(err);
+      callback(false);
     });
   }
 
@@ -398,6 +419,8 @@ class AppStore {
     callback(account);
 
   }
+
+
 
   @action
   obtainNewAccount(callback, mnemonic, index){

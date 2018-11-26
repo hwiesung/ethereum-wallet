@@ -1,10 +1,9 @@
 import React, { Component } from 'react'
 import { View, Text, Image, TouchableOpacity, ActivityIndicator, TextInput} from 'react-native';
-import DefaultPreference from 'react-native-default-preference';
-const moment = require('moment');
 import { observer, inject } from 'mobx-react/native'
 import { NavigationActions, StackActions } from 'react-navigation'
 import LinearGradient from 'react-native-linear-gradient';
+import Toast, {DURATION} from 'react-native-easy-toast'
 
 import {action} from "mobx/lib/mobx";
 
@@ -26,9 +25,14 @@ export default class WithdrawalAddress extends Component {
   }
 
   @action.bound
-  transactionAdded(){
-    console.log('transaction added!!!');
+  transactionAdded(success, receipt){
+    console.log('transaction callback:'+success);
     this.setState({isProcessing:false});
+    if(!success){
+      this.refs.toast.show('transaction failed. Try again later', DURATION.LENGTH_SHORT);
+      return;
+    }
+
     this.props.navigation.dispatch(StackActions.reset({
       index: 0,
       key: null,
@@ -68,7 +72,7 @@ export default class WithdrawalAddress extends Component {
     let token = this.props.navigation.getParam('token', {});
     let amount = this.props.navigation.getParam('amount', '0');
     let localWallet = this.props.appStore ? this.props.appStore.localWallets[token.address] : {};
-    console.log(localWallet);
+
     if(this.state.complete && localWallet.privateKey){
       let params = {from:localWallet.address, to:this.state.value, amount:amount, privateKey:localWallet.privateKey, token:token.symbol};
       console.log(params);
@@ -124,7 +128,7 @@ export default class WithdrawalAddress extends Component {
           </View>
 
         </View>
-
+        <Toast style={{marginBottom:60}} ref="toast"/>
         <View style={{flex:1}}>
         </View>
 

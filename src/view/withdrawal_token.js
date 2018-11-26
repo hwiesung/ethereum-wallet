@@ -1,10 +1,8 @@
 import React, { Component } from 'react'
 import { View, Text, Image, TouchableOpacity, ListView, ActivityIndicator, TextInput} from 'react-native';
-import DefaultPreference from 'react-native-default-preference';
-import axios from 'axios';
+import Toast, {DURATION} from 'react-native-easy-toast'
 const moment = require('moment');
 import { observer, inject } from 'mobx-react/native'
-import { action } from 'mobx'
 import LinearGradient from 'react-native-linear-gradient';
 
 @inject("appStore") @observer
@@ -49,8 +47,12 @@ export default class WithdrawalToken extends Component {
     this.props.navigation.pop();
   }
 
-  moveNext(){
+  moveNext(balance){
     let token = this.props.navigation.getParam('token', {});
+    if(balance < parseFloat(this.state.value)){
+      this.refs.toast.show('not enough balance', DURATION.LENGTH_SHORT);
+      return;
+    }
     this.props.navigation.navigate('WithdrawalAddress', {token:token, amount:this.state.value});
   }
 
@@ -68,7 +70,7 @@ export default class WithdrawalToken extends Component {
     else{
       balance = wallet.token && wallet.token[token.symbol]?wallet.token[token.symbol].value:'';
     }
-    console.log(wallet);
+
 
     return (
       <LinearGradient colors={['#5da7dc', '#306eb6']} style={{ flex:1}}>
@@ -106,11 +108,11 @@ export default class WithdrawalToken extends Component {
           </View>
 
         </View>
-
+        <Toast style={{marginBottom:60}} ref="toast"/>
         <View style={{flex:1}}>
         </View>
 
-        {(!this.state.isProcessing)?(<TouchableOpacity onPress={()=>this.moveNext()} style={{justifyContent: 'center',alignItems: 'center', marginLeft:15, marginRight:15, backgroundColor:'white', marginBottom:38, borderRadius:12, marginTop:14, height:58}}>
+        {(!this.state.isProcessing)?(<TouchableOpacity onPress={()=>this.moveNext(balance)} style={{justifyContent: 'center',alignItems: 'center', marginLeft:15, marginRight:15, backgroundColor:'white', marginBottom:38, borderRadius:12, marginTop:14, height:58}}>
             <Text style={{color:'black', fontSize:20, fontWeight:'bold'}}>Next</Text>
         </TouchableOpacity>):(<ActivityIndicator style={{marginBottom:38}}/>)}
 

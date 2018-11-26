@@ -1,12 +1,12 @@
 package com.comcomai.wallet;
 
+import com.kevinresol.react_native_default_preference.RNDefaultPreferencePackage;
 import android.annotation.SuppressLint;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
 import com.lugg.ReactNativeConfig.ReactNativeConfigPackage;
 import com.BV.LinearGradient.LinearGradientPackage;
-import com.reactlibrary.RNDefaultPreferencePackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
